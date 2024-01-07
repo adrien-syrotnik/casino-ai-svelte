@@ -93,7 +93,5 @@
 </div>
 
 <style>
-	:global(.symbol.win) {
-		border: 3px solid red;
-	}
+
 </style>
