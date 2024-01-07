@@ -3,10 +3,11 @@
 	import { DEFAULT_SYMBOLS, checkLines25, getRandSymbol } from '$lib/symbols';
 	import { onMount } from 'svelte';
 	import PlayerBar from './player-bar.svelte';
+	import ImageGeneratorBar from './image-generator-bar.svelte';
 	let symbol = DEFAULT_SYMBOLS[0];
 	let Slotreel = [null, null, null, null, null] as any;
 
-	function AnimateWinLine(line: { reelAndRow: number[][]; reward: number; symbol: string }) {
+	function AnimateWinLine(line: { reelAndRow: number[][]; reward: number; symbol: string; numberOfSymbol: number }) {
 		line.reelAndRow.forEach((pos) => {
 			const reel = pos[0];
 			const row = pos[1];
@@ -15,6 +16,10 @@
 			const child = symbolNode.children[0];
 			child.classList.add('win');
 		});
+
+		currentWinLineSymbol = line.symbol;
+		currentWinLineReward = line.reward;
+		currentWinLineNumberOfSymbols = line.numberOfSymbol;
 	}
 
 	async function StopAnimateWinLine() {
@@ -29,6 +34,9 @@
 				child.classList.remove('win');
 			});
 		});
+		currentWinLineSymbol = '';
+		currentWinLineReward = 0;
+		currentWinLineNumberOfSymbols = 0;
 		await new Promise((resolve) => setTimeout(resolve, 1));
 	}
 
@@ -83,7 +91,6 @@
 				string[]
 			];
 			let result = checkLines25(...symbolReel);
-			console.log(result);
 
 			reward = result.reward;
 			balance += result.reward;
@@ -108,6 +115,7 @@
 		reelAndRow: number[][];
 		reward: number;
 		symbol: string;
+		numberOfSymbol: number;
 	}[] = [];
 	let indexWinLine = 0;
 
@@ -124,6 +132,10 @@
 			AnimateLineIndividually();
 		}, 2500);
 	}
+
+	let currentWinLineSymbol = '';
+	let currentWinLineReward = 0;
+	let currentWinLineNumberOfSymbols = 0;
 </script>
 
 <div class="container justify-center mx-auto flex flex-col text-center" style="margin-top: 200px;">
@@ -144,6 +156,18 @@
 			<SlotReel bind:this={Slotreel[4]} />
 		</div>
 	</div>
+
+	<div class="flex justify-center" style="height: 20px;">
+		{#if currentWinLineSymbol != ''}
+			Win Line:&nbsp;<img
+				style="width: 20px; height: 20px;"
+				src={DEFAULT_SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
+				alt=""
+			/>
+			x {currentWinLineNumberOfSymbols} = {currentWinLineReward}€
+		{/if}
+	</div>
+
 	<PlayerBar
 		bind:bet
 		bind:win={reward}
@@ -151,6 +175,8 @@
 		bind:balance
 		on:spin={() => SpinAllDelay()}
 	/>
+
+	<ImageGeneratorBar />
 </div>
 
 <style>

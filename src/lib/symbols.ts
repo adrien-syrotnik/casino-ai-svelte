@@ -79,7 +79,8 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
     lines: {
         reelAndRow: number[][],
         reward: number,
-        symbol: string
+        symbol: string,
+        numberOfSymbol: number
     }[],
     reward: number
 } {
@@ -111,7 +112,8 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
             lines.push({
                 reelAndRow: line.slice(0, 5).map((row, reel) => [reel, row]),
                 reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward,
-                symbol
+                symbol,
+                numberOfSymbol: 5
             });
             reward += lines[lines.length - 1].reward;
 
@@ -129,7 +131,8 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
             lines.push({
                 reelAndRow: line.slice(0, 4).map((row, reel) => [reel, row]),
                 reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.6,
-                symbol
+                symbol,
+                numberOfSymbol: 4
             });
             reward += lines[lines.length - 1].reward;
 
@@ -146,13 +149,18 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
             lines.push({
                 reelAndRow: line.slice(0, 3).map((row, reel) => [reel, row]),
                 reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.3,
-                symbol
+                symbol,
+                numberOfSymbol: 3
             });
             reward += lines[lines.length - 1].reward;
         }
 
 
     }
+
+    //Order lines by reward
+    lines.sort((a, b) => b.reward - a.reward);
+
     return { lines, reward };
 }
 
