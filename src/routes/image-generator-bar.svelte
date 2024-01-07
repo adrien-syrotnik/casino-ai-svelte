@@ -9,7 +9,7 @@
         <span>Input</span>
         <input class="input" type="text" placeholder="Input" />
     </label>
-    <button type="submit" class="btn">Generate Images</button>
+    <button class="btn mt-3 variant-filled">Generate Images</button>
 
     <!-- <div class="grid grid-cols-[auto_1fr] gap-2">
         <input class="input" type="color" bind:value={colorValue} />

@@ -1,0 +1,8 @@
+{
+    "primary": "#FFD700",
+    "secondary": "#708090",
+    "tertiary": "#FF4500",
+    "success": "#32CD32",
+    "error": "#B22222",
+    "background": "#000000"
+}

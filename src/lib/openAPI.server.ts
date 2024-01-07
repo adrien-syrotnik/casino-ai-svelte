@@ -36,22 +36,19 @@ export async function testDalle() {
     // const Test_prompt_theme = "A dark theme of batman"
     // generateColorPalette(Test_prompt_theme);
 
-    // {
-    //     "primary": "#FFD700",
-    //     "secondary": "#708090",
-    //     "tertiary": "#FF4500",
-    //     "success": "#32CD32",
-    //     "error": "#B22222",
-    //     "background": "#000000"
-    //   }
+
 }
 
 
 export function generateSlotSpriteSheets(prompt_theme: string) {
 
-    //Generate all symbols (10, J, Q, K, A, m1, m2, m3, m4, wild)
+    //Generate all symbols (10, J, Q, K, A)
     // const symbols = ["10", "J", "Q", "K", "A", "m1", "m2", "m3", "m4", "wild"];
-    // const prompt = symbols.map(symbol => `a ${symbol} symbol sprite, transparent background, 256x256px, ${prompt_theme}`).join("\n");
+    // const prompt = symbols.map(symbol => `a ${symbol} symbol sprite for an online slot machine, black background, 256x256px, ${prompt_theme}`).join("\n");
+
+    // Generate 4 random medium symbols and get the 4 ideas
+
+    //Generate the wild with the text
 
     //Generate Background image
 

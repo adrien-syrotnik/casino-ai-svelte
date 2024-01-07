@@ -1,31 +1,60 @@
-export type SlotSymbol = {
-    name: string;
-    reward: number;
-    image?: string;
-};
+import fs from 'fs';
+import type { SlotConfig, SlotSymbol } from './symbols.types';
 
-import _10 from '$lib/assets/10.png';
-import J from '$lib/assets/J.png';
-import Q from '$lib/assets/Q.png';
-import K from '$lib/assets/K.png';
-import A from '$lib/assets/A.png';
-import m1 from '$lib/assets/m1.png';
-import m2 from '$lib/assets/m2.png';
-import m3 from '$lib/assets/m3.png';
-import m4 from '$lib/assets/m4.png';
-import wild from '$lib/assets/wild.png';
+export let currentConfig: SlotConfig = getConfig('default');
+
+export function getAllConfigs(): string[] {
+    //Check for the folders present in the config folder, path : 'slot-configs/'
+    const dirs = fs.readdirSync('static/slot-configs/');
+    console.log(dirs);
+
+    //Check if all the folders have the required files (check only 10.png and colors.json)
+    //If not, remove the folder from the list
+
+    // WAIT FOR TEST TODO
+    // for (const dir of dirs) {
+    //     const files = fs.readdirSync(`static/slot-configs/${dir}`);
+    //     if (!files.includes('10.png') || !files.includes('colors.json')) {
+    //         dirs.splice(dirs.indexOf(dir), 1);
+    //     }
+    // }
+    return dirs;
+}
+
+export function getConfig(name: string): SlotConfig {
+    //Check if the config exists
+    const colors = JSON.parse(fs.readFileSync(`static/slot-configs/${name}/colors.json`, 'utf8'));
+    const config: SlotConfig = {
+        _10: `slot-configs/${name}/10.png`,
+        J: `slot-configs/${name}/J.png`,
+        Q: `slot-configs/${name}/Q.png`,
+        K: `slot-configs/${name}/K.png`,
+        A: `slot-configs/${name}/A.png`,
+        m1: `slot-configs/${name}/m1.png`,
+        m2: `slot-configs/${name}/m2.png`,
+        m3: `slot-configs/${name}/m3.png`,
+        m4: `slot-configs/${name}/m4.png`,
+        wild: `slot-configs/${name}/wild.png`,
+        background: `slot-configs/${name}/background.png`,
+        colors,
+        name
+    };
+    return config;
+}
+
+
 
 export const DEFAULT_SYMBOLS: SlotSymbol[] = [
-    { name: '10', reward: 80, image: _10 },
-    { name: 'J', reward: 80, image: J },
-    { name: 'Q', reward: 100, image: Q },
-    { name: 'K', reward: 100, image: K },
-    { name: 'A', reward: 120, image: A },
-    { name: 'm1', reward: 200, image: m1 },
-    { name: 'm2', reward: 220, image: m2 },
-    { name: 'm3', reward: 260, image: m3 },
-    { name: 'm4', reward: 300, image: m4 },
-    { name: 'wild', reward: 400, image: wild }
+    { name: '10', reward: 80, image: currentConfig._10 },
+    { name: 'J', reward: 80, image: currentConfig.J },
+    { name: 'Q', reward: 100, image: currentConfig.Q },
+    { name: 'K', reward: 100, image: currentConfig.K },
+    { name: 'A', reward: 120, image: currentConfig.A },
+    { name: 'm1', reward: 200, image: currentConfig.m1 },
+    { name: 'm2', reward: 220, image: currentConfig.m2 },
+    { name: 'm3', reward: 260, image: currentConfig.m3 },
+    { name: 'm4', reward: 300, image: currentConfig.m4 },
+    { name: 'wild', reward: 400, image: currentConfig.wild },
     // { name: 'bonus', reward: 700 }
 ];
 

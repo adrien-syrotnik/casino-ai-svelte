@@ -2,9 +2,10 @@
 	import { spring, tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
-	import { DEFAULT_SYMBOLS, getRandSymbol } from '$lib/symbols';
 	import { onMount } from 'svelte';
-	export let symbol = DEFAULT_SYMBOLS[0];
+	import type { SlotSymbol } from '$lib/symbols.types';
+
+	export let symbol:SlotSymbol;
 
 	let symbolNode: any = null;
 

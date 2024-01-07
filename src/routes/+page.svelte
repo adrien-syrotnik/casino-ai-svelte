@@ -1,23 +1,14 @@
 <script lang="ts">
-
-  import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import SlotMachine from './slot-machine.svelte';
 
+	/** @type {import('./$types').PageData} */
+	export let data;
 
-  onMount(() => {
-    
+	onMount(() => {});
 
-  });
-
-  onDestroy(() => {
-
-  });
-
-  
-
-
+	onDestroy(() => {});
 </script>
-
 
 <!-- YOU CAN DELETE EVERYTHING IN THIS PAGE -->
 
@@ -35,9 +26,7 @@
 	</div>
 </div> -->
 
-
-<SlotMachine></SlotMachine>
+<SlotMachine bind:data></SlotMachine>
 
 <style>
-
 </style>

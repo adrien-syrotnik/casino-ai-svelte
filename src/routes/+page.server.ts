@@ -1,10 +1,9 @@
-import { testDalle } from "$lib/openAPI.server";
+import { DEFAULT_SYMBOLS, currentConfig, getAllConfigs } from '$lib/symbols.server';
 
-
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ params }) {
-    testDalle();
+export function load() {
 	return {
-		// post: await db.getPost(params.slug)
+		symbols: DEFAULT_SYMBOLS,
+        currentConfig,
+        allConfigs: getAllConfigs()
 	};
 }

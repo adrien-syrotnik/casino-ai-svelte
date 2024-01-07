@@ -1,13 +1,26 @@
 <script lang="ts">
 	import SlotReel from './slot-reel.svelte';
-	import { DEFAULT_SYMBOLS, checkLines25, getRandSymbol } from '$lib/symbols';
 	import { onMount } from 'svelte';
 	import PlayerBar from './player-bar.svelte';
 	import ImageGeneratorBar from './image-generator-bar.svelte';
-	let symbol = DEFAULT_SYMBOLS[0];
+	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
+	
+
+	/** @type {import('./$types').PageData} */
+	export let data;
+
+	const SYMBOLS = data.symbols as SlotSymbol[];
+	const currentConfig = data.currentConfig as SlotConfig;
+	const allConfigs = data.allConfigs as string[];
+
 	let Slotreel = [null, null, null, null, null] as any;
 
-	function AnimateWinLine(line: { reelAndRow: number[][]; reward: number; symbol: string; numberOfSymbol: number }) {
+	function AnimateWinLine(line: {
+		reelAndRow: number[][];
+		reward: number;
+		symbol: string;
+		numberOfSymbol: number;
+	}) {
 		line.reelAndRow.forEach((pos) => {
 			const reel = pos[0];
 			const row = pos[1];
@@ -82,15 +95,32 @@
 
 		spinEnabled = false;
 
-		setTimeout(() => {
-			const symbolReel = Slotreel.map((r: any) => r.currentSymbols) as [
-				string[],
-				string[],
-				string[],
-				string[],
-				string[]
-			];
-			let result = checkLines25(...symbolReel);
+		setTimeout(async () => {
+			const symbolReel = {
+				reel1: Slotreel[0].currentSymbols,
+				reel2: Slotreel[1].currentSymbols,
+				reel3: Slotreel[2].currentSymbols,
+				reel4: Slotreel[3].currentSymbols,
+				reel5: Slotreel[4].currentSymbols
+			};
+
+			const response = await fetch('/api/slot/spin', {
+				method: 'POST',
+				body: JSON.stringify(symbolReel),
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+
+			let result: {
+				lines: {
+					reelAndRow: number[][];
+					reward: number;
+					symbol: string;
+					numberOfSymbol: number;
+				}[];
+				reward: number;
+			} = await response.json();
 
 			reward = result.reward;
 			balance += result.reward;
@@ -139,6 +169,16 @@
 </script>
 
 <div class="container justify-center mx-auto flex flex-col text-center" style="margin-top: 200px;">
+	
+	<label class="label my-5">
+		<span>Select a theme</span>
+		<select class="select" bind:value={currentConfig.name}>
+			{#each allConfigs as config}
+				<option value={config}>{config}</option>
+			{/each}
+		</select>
+	</label>
+	
 	<div class="slot-machine justify-center mx-auto">
 		<div class="reel">
 			<SlotReel bind:this={Slotreel[0]} />
@@ -161,7 +201,7 @@
 		{#if currentWinLineSymbol != ''}
 			Win Line:&nbsp;<img
 				style="width: 20px; height: 20px;"
-				src={DEFAULT_SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
+				src={SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
 				alt=""
 			/>
 			x {currentWinLineNumberOfSymbols} = {currentWinLineReward}€
