@@ -28,7 +28,7 @@
 </div> -->
 
 <AppBar gridColumns="grid-cols-1" background={""} slotDefault="place-self-center">
-		<img src="/logo.png" alt="logo" style="width: 200px;" />
+		<img src="/logo2-bg.jpg" alt="logo" style="width: 150px; border-radius: 50%;" />
 </AppBar>
 
 <SlotMachine bind:data></SlotMachine>

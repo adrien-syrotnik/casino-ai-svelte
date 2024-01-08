@@ -41,6 +41,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "1.5.3",
+    "@huggingface/inference": "^2.6.4",
     "highlight.js": "11.9.0",
     "openai": "^4.24.1"
   }
