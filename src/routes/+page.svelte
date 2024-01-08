@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import SlotMachine from './slot-machine.svelte';
+	import { AppBar } from '@skeletonlabs/skeleton';
 
 	/** @type {import('./$types').PageData} */
-	export let data;
+	export let data:any;
 
 	onMount(() => {});
 
@@ -25,6 +26,10 @@
 		</ul>
 	</div>
 </div> -->
+
+<AppBar gridColumns="grid-cols-1" background={""} slotDefault="place-self-center">
+		<img src="/logo.png" alt="logo" style="width: 200px;" />
+</AppBar>
 
 <SlotMachine bind:data></SlotMachine>
 

@@ -168,9 +168,9 @@
 	let currentWinLineNumberOfSymbols = 0;
 </script>
 
-<div class="container justify-center mx-auto flex flex-col text-center" style="margin-top: 200px;">
+<div class="container justify-center mx-auto flex flex-col text-center">
 	
-	<label class="label my-5">
+	<label class="label">
 		<span>Select a theme</span>
 		<select class="select" bind:value={currentConfig.name}>
 			{#each allConfigs as config}
