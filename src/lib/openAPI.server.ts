@@ -5,9 +5,9 @@ import fetch from "node-fetch";
 // import {readFileSync} from "fs"
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-    apiKey: env.OPENAI_API_KEY
-});
+// const openai = new OpenAI({
+//     apiKey: env.OPENAI_API_KEY
+// });
 
 
 export async function testDalle() {
@@ -22,22 +22,22 @@ export async function testDalle() {
     
     Feel free to iterate on the results, refining the prompt based on the generated images to achieve the desired level of detail and visual appeal.`;
     
-    const response = await openai.images.generate({
-        model: "dall-e-2",
-        prompt,
-        n: 4,
-        size: "256x256"
-    });
+    // const response = await openai.images.generate({
+    //     model: "dall-e-2",
+    //     prompt,
+    //     n: 4,
+    //     size: "256x256"
+    // });
 
 
-    console.log(response.data[0].url)
-    console.log(response.data[0].b64_json)
-    //Download image and store it
-    if (response.data[0].url) {
-        const image = await fetch(response.data[0].url);
-        const buffer = await image.buffer();
-        await writeFile("static/dalle.png", buffer);
-    }
+    // console.log(response.data[0].url)
+    // console.log(response.data[0].b64_json)
+    // //Download image and store it
+    // if (response.data[0].url) {
+    //     const image = await fetch(response.data[0].url);
+    //     const buffer = await image.buffer();
+    //     await writeFile("static/dalle.png", buffer);
+    // }
     // const image = await fetch(url);
     // const buffer = await image.buffer();
     // //Create new file
