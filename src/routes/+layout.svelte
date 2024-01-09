@@ -4,7 +4,7 @@
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
 	import 'highlight.js/styles/github-dark.css';
-	import { storeHighlightJs } from '@skeletonlabs/skeleton';
+	import { storeHighlightJs, type ModalComponent } from '@skeletonlabs/skeleton';
 	import xml from 'highlight.js/lib/languages/xml'; // for HTML
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
@@ -20,6 +20,17 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+
+	import { Modal, initializeStores } from '@skeletonlabs/skeleton';
+	import RewardsModal from './rewards-modal.svelte';
+
+	initializeStores();
+
+	const modalRegistry: Record<string, ModalComponent> = {
+		rewardsModal: { ref: RewardsModal }
+	};
 </script>
+
+<Modal components={modalRegistry} />
 
 <slot />

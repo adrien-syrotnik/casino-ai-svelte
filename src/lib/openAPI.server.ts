@@ -8,13 +8,6 @@ import OpenAI from "openai";
 import { HfInference } from "@huggingface/inference";
 import { AllImageToGenerate } from './states-image-generation';
 
-// const openai = new OpenAI({
-//     apiKey: env.OPENAI_API_KEY
-// });
-
-// import { DiffusionPipeline } from '@aislamov/diffusers.js'
-// import { PNG } from 'pngjs'
-
 
 export async function testHugginModel() {
 
@@ -96,7 +89,7 @@ export async function testHugginModel() {
 
 
 export interface StateImageGeneration {
-    prompt: (theme:string) => string,
+    prompt: (theme: string) => string,
     status: string,
     symbol: string,
     sizeW?: number,
@@ -112,8 +105,12 @@ export let currentStateImageGeneration: StateImageGeneration = {
 export let currentImageGenerationTheme: string = "";
 export let currentImageGenerationStep: number = 0;
 
+export function resetImageGeneration() {
+    currentImageGenerationTheme = "";
+    currentImageGenerationStep = 0;
+}
 
-export async function GenerateAllImages(theme: string, precision:number = 5) {
+export async function GenerateAllImagesLocal(theme: string, precision: number = 5) {
     currentImageGenerationTheme = theme;
     currentImageGenerationStep = 0;
 
@@ -122,7 +119,7 @@ export async function GenerateAllImages(theme: string, precision:number = 5) {
 
     for (const state of AllImageToGenerate) {
         currentStateImageGeneration = state;
-        await GenerateImage(state.prompt(theme), `static/slot-configs/${theme}/${state.symbol}.png`, precision);
+        await GenerateImageLocal(state.prompt(theme), `static/slot-configs/${theme}/${state.symbol}.png`, precision);
         currentImageGenerationStep++;
     }
 
@@ -147,7 +144,44 @@ export async function GenerateAllImages(theme: string, precision:number = 5) {
 
 }
 
-export async function GenerateImage(prompt: string, name: string, finishStep = 5) {
+export async function GenerateAllImagesOpenAI(theme: string, apiKey: string, isDalle3: boolean, precision: number = 5) {
+    currentImageGenerationTheme = theme;
+    currentImageGenerationStep = 0;
+
+    //Create the new folder
+    await mkdir(`static/slot-configs/${theme}`, { recursive: true });
+
+    for (const state of AllImageToGenerate) {
+        currentStateImageGeneration = state;
+        await GenerateImageDalle3(state.prompt(theme), apiKey, isDalle3, `static/slot-configs/${theme}/${state.symbol}.png`, precision);
+        currentImageGenerationStep++;
+    }
+
+    //After finished, generate the color palette in a new file : colors.json
+    // const colors = await generateColorPalette(theme);
+
+    //For now, use random colors
+    const colors = {
+        primary: "#000000",
+        secondary: "#000000",
+        tertiary: "#000000",
+        success: "#000000",
+        error: "#000000",
+        background: "#000000"
+    }
+
+    await writeFile(`static/slot-configs/${theme}/colors.json`, JSON.stringify(colors));
+
+
+    currentImageGenerationTheme = "";
+    currentImageGenerationStep = 0;
+
+}
+
+
+
+
+export async function GenerateImageLocal(prompt: string, name: string, finishStep = 5) {
 
     currentStateImageGeneration.status = "Starting image generation...";
 
@@ -175,75 +209,39 @@ export async function GenerateImage(prompt: string, name: string, finishStep = 5
 }
 
 
-export async function testDalleLocal() {
-        // const prompt = "'J' symbol sprite for an online slot machine, black background, 256x256px, a dark theme of batman"
 
-        const prompt = `Generate a striking image using DALL·E 3 that features a wild symbol sprite for an online slot machine. The background should be a deep black, creating a stark contrast to highlight the main elements. The wild symbol should be a dynamic and eye-catching sprite, incorporating vibrant colors and intricate details to evoke a sense of excitement.
+export async function GenerateImageDalle3(prompt: string, apiKey: string, isDalle3: boolean, name: string, finishStep = 5) {
 
-Specify that the wild symbol itself should be composed of various shapes, perhaps resembling a combination of stars, diamonds, and swirls, symbolizing its unpredictability and dynamic nature. The text "wild" should be prominently displayed within or around the symbol, using a bold and stylized font that complements the overall design.
+    
+        const openai = new OpenAI({
+            apiKey
+        });
 
-Consider the perspective by opting for a close-up view of the wild symbol, ensuring that its details are clearly visible. Illuminate the sprite with a dramatic and focused light source, enhancing the overall visual impact. The composition should be well-balanced, with the wild symbol positioned centrally against the black background.
+        currentStateImageGeneration.status = "Generating image using DALL-E...";
+        
+        const response = await openai.images.generate({
+            model: isDalle3 ? "dall-e-3" : "dall-e-2",
+            prompt,
+            // quality: 'standard', -> only for DALL-E 3
+            n: 1,
+            size: isDalle3 ? "1024x1024" : "256x256"
+        });
 
-Infuse the image with a lively and energetic mood, capturing the essence of the excitement associated with slot machines. The overall style should be modern and sleek, with a touch of fantasy to make it visually captivating.
+        currentStateImageGeneration.status = "Downloading image...";
 
-Feel free to iterate on the results, refining the prompt based on the generated images to achieve the desired level of detail and visual appeal.`;
+        console.log(response.data[0].url);
+        //Download image and store it
+        if (response.data[0].url) {
+            const image = await fetch(response.data[0].url);
+            const buffer = await image.buffer();
+            await writeFile(name, buffer);
+            return;
+        }
 
-
-
-    await GenerateImage(prompt, "dalle.png");
-
-
+        throw new Error("Dalle: No image generated");
 }
 
 
-export async function testDalle() {
-    const url = "https://oaidalleapiprodscus.blob.core.windows.net/private/org-4UxCctuaSkHOGTR8GuMtT2V9/user-J4RjO6EIdr0aj4HVCZn5oeaO/img-kcELebkGHAMDjNeioyqRe3di.png?st=2024-01-07T16%3A47%3A32Z&se=2024-01-07T18%3A47%3A32Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-07T14%3A23%3A14Z&ske=2024-01-08T14%3A23%3A14Z&sks=b&skv=2021-08-06&sig=MVoHJAf3ZU%2BLOXCTRKnP7FHSay4rCPjTL3fQJ0%2BeDAQ%3D"
-
-
-    // const response = await openai.images.generate({
-    //     model: "dall-e-2",
-    //     prompt,
-    //     n: 4,
-    //     size: "256x256"
-    // });
-
-
-    // console.log(response.data[0].url)
-    // console.log(response.data[0].b64_json)
-    // //Download image and store it
-    // if (response.data[0].url) {
-    //     const image = await fetch(response.data[0].url);
-    //     const buffer = await image.buffer();
-    //     await writeFile("static/dalle.png", buffer);
-    // }
-    // const image = await fetch(url);
-    // const buffer = await image.buffer();
-    // //Create new file
-    // await writeFile("static/dalle.png", buffer);
-
-    // const Test_prompt_theme = "A dark theme of batman"
-    // generateColorPalette(Test_prompt_theme);
-
-
-}
-
-
-export function generateSlotSpriteSheets(prompt_theme: string) {
-
-    //Generate all symbols (10, J, Q, K, A)
-    // const symbols = ["10", "J", "Q", "K", "A", "m1", "m2", "m3", "m4", "wild"];
-    // const prompt = symbols.map(symbol => `a ${symbol} symbol sprite for an online slot machine, black background, 256x256px, ${prompt_theme}`).join("\n");
-
-    // Generate 4 random medium symbols and get the 4 ideas
-
-    //Generate the wild with the text
-
-    //Generate Background image
-
-
-
-
-}
 
 async function generateColorPalette(prompt_theme: string) {
     //Get color palette from prompt_theme (primary, secondary, tertiary, success, error, background)

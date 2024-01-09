@@ -5,14 +5,27 @@
 	import ImageGeneratorBar from './image-generator-bar.svelte';
 	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
 	import { enhance } from '$app/forms';
-	
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+
+	const modalStore = getModalStore();
+
+
 
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	const SYMBOLS = data.symbols as SlotSymbol[];
+	export const SYMBOLS = data.symbols as SlotSymbol[];
 	const currentConfig = data.currentConfig as SlotConfig;
 	const allConfigs = data.allConfigs as string[];
+
+	const modal: ModalSettings = {
+		type: 'component',
+		component: 'rewardsModal',
+		meta : {
+			SYMBOLS: SYMBOLS
+		}
+	};
+	
 
 	let Slotreel = [null, null, null, null, null] as any;
 
@@ -170,19 +183,22 @@
 </script>
 
 <div class="container justify-center mx-auto flex flex-col text-center">
-	
 	<form method="post" use:enhance>
 		<label class="label">
 			<span>Select a theme</span>
-			<select class="select" bind:value={currentConfig.name} onchange="this.form.submit()" name="themeChoose">
+			<select
+				class="select"
+				bind:value={currentConfig.name}
+				onchange="this.form.submit()"
+				name="themeChoose"
+			>
 				{#each allConfigs as config}
 					<option value={config}>{config}</option>
 				{/each}
 			</select>
 		</label>
 	</form>
-	
-	
+
 	<div class="slot-machine justify-center mx-auto">
 		<div class="reel">
 			<SlotReel bind:this={Slotreel[0]} />
@@ -200,6 +216,8 @@
 			<SlotReel bind:this={Slotreel[4]} />
 		</div>
 	</div>
+
+	<button style="width: 100px;" class="btn variant-filled-warning" on:click={() => modalStore.trigger(modal)}>See reward</button>
 
 	<div class="flex justify-center" style="height: 20px;">
 		{#if currentWinLineSymbol != ''}

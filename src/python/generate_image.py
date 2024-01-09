@@ -20,11 +20,21 @@ if(len(args) > 2):
 
 # print(prompt)
         
-pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')  
+# pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')  
+# pipeline = AutoPipelineForText2Image.from_pretrained('openskyml/dalle-3-xl', torch_dtype=torch.float16).to('cuda')  
+# pipeline = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", use_safetensors=True)
+    
+pipeline =  AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to('cuda')
+# pipeline = DiffusionPipeline.from_pretrained("openskyml/dalle-3-xl", use_safetensors=True).to('cuda')
+# pipeline = StableDiffusionPipeline.from_single_file(
+#     "https://huggingface.co/openskyml/dalle-3-xl/blob/main/Dall-e_3_0.3-v2.safetensors"
+# ).to('cuda')
+
 def progress(step, timestep, latents):
     print("step: ", step)
     sys.stdout.flush()
-    # print(step, timestep, latents[0][0][0][0])      
+
+     
 # image = pipeline('"J" symbol sprite for an online slot machine, black background, 256x256px, a dark theme of batman').images[0]   
 image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps).images[0]
 
