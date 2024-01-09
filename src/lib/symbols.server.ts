@@ -1,12 +1,11 @@
 import fs from 'fs';
 import type { SlotConfig, SlotSymbol } from './symbols.types';
 
-export let currentConfig: SlotConfig = getConfig('default');
+export let currentConfig: SlotConfig;
 
 export function getAllConfigs(): string[] {
     //Check for the folders present in the config folder, path : 'slot-configs/'
     const dirs = fs.readdirSync('static/slot-configs/');
-    console.log(dirs);
 
     //Check if all the folders have the required files (check only 10.png and colors.json)
     //If not, remove the folder from the list
@@ -23,6 +22,10 @@ export function getAllConfigs(): string[] {
 
 export function getConfig(name: string): SlotConfig {
     //Check if the config exists
+    if (!getAllConfigs().includes(name)) {
+        throw new Error(`The config ${name} doesn't exists`);
+    }
+
     const colors = JSON.parse(fs.readFileSync(`static/slot-configs/${name}/colors.json`, 'utf8'));
     const config: SlotConfig = {
         _10: `slot-configs/${name}/10.png`,
@@ -42,21 +45,29 @@ export function getConfig(name: string): SlotConfig {
     return config;
 }
 
+export function setConfig(name: string) {
+    currentConfig = getConfig(name);
+    DEFAULT_SYMBOLS = [
+        { name: '10', reward: 80, image: currentConfig._10 },
+        { name: 'J', reward: 80, image: currentConfig.J },
+        { name: 'Q', reward: 100, image: currentConfig.Q },
+        { name: 'K', reward: 100, image: currentConfig.K },
+        { name: 'A', reward: 120, image: currentConfig.A },
+        { name: 'm1', reward: 200, image: currentConfig.m1 },
+        { name: 'm2', reward: 220, image: currentConfig.m2 },
+        { name: 'm3', reward: 260, image: currentConfig.m3 },
+        { name: 'm4', reward: 300, image: currentConfig.m4 },
+        { name: 'wild', reward: 400, image: currentConfig.wild },
+        // { name: 'bonus', reward: 700 }
+    ];
+}
 
 
-export const DEFAULT_SYMBOLS: SlotSymbol[] = [
-    { name: '10', reward: 80, image: currentConfig._10 },
-    { name: 'J', reward: 80, image: currentConfig.J },
-    { name: 'Q', reward: 100, image: currentConfig.Q },
-    { name: 'K', reward: 100, image: currentConfig.K },
-    { name: 'A', reward: 120, image: currentConfig.A },
-    { name: 'm1', reward: 200, image: currentConfig.m1 },
-    { name: 'm2', reward: 220, image: currentConfig.m2 },
-    { name: 'm3', reward: 260, image: currentConfig.m3 },
-    { name: 'm4', reward: 300, image: currentConfig.m4 },
-    { name: 'wild', reward: 400, image: currentConfig.wild },
-    // { name: 'bonus', reward: 700 }
-];
+
+export let DEFAULT_SYMBOLS: SlotSymbol[] = [];
+
+setConfig('default');
+
 
 export function getRandSymbol(symbols: SlotSymbol[] = DEFAULT_SYMBOLS): SlotSymbol {
     //Get random symbol from reward, more reward = less chance

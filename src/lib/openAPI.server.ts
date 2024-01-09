@@ -1,11 +1,12 @@
 import { env } from '$env/dynamic/private';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import fetch from "node-fetch";
 import { spawn } from "child_process";
 
 // import {readFileSync} from "fs"
 import OpenAI from "openai";
 import { HfInference } from "@huggingface/inference";
+import { AllImageToGenerate } from './states-image-generation';
 
 // const openai = new OpenAI({
 //     apiKey: env.OPENAI_API_KEY
@@ -91,17 +92,90 @@ export async function testHugginModel() {
 }
 
 
-export async function GenerateImage(prompt: string, name: string) {
-    const t = spawn('src/python/image-generator-env/Scripts/python', ["src/python/generate_image.py", prompt, name]);
+
+
+
+export interface StateImageGeneration {
+    prompt: (theme:string) => string,
+    status: string,
+    symbol: string,
+    sizeW?: number,
+    sizeH?: number
+}
+
+export let currentStateImageGeneration: StateImageGeneration = {
+    prompt: () => "",
+    status: "",
+    symbol: "",
+}
+
+export let currentImageGenerationTheme: string = "";
+export let currentImageGenerationStep: number = 0;
+
+
+export async function GenerateAllImages(theme: string, precision:number = 5) {
+    currentImageGenerationTheme = theme;
+    currentImageGenerationStep = 0;
+
+    //Create the new folder
+    await mkdir(`static/slot-configs/${theme}`, { recursive: true });
+
+    for (const state of AllImageToGenerate) {
+        currentStateImageGeneration = state;
+        await GenerateImage(state.prompt(theme), `static/slot-configs/${theme}/${state.symbol}.png`, precision);
+        currentImageGenerationStep++;
+    }
+
+    //After finished, generate the color palette in a new file : colors.json
+    // const colors = await generateColorPalette(theme);
+
+    //For now, use random colors
+    const colors = {
+        primary: "#000000",
+        secondary: "#000000",
+        tertiary: "#000000",
+        success: "#000000",
+        error: "#000000",
+        background: "#000000"
+    }
+
+    await writeFile(`static/slot-configs/${theme}/colors.json`, JSON.stringify(colors));
+
+
+    currentImageGenerationTheme = "";
+    currentImageGenerationStep = 0;
+
+}
+
+export async function GenerateImage(prompt: string, name: string, finishStep = 5) {
+
+    currentStateImageGeneration.status = "Starting image generation...";
+
+    const t = spawn('src/python/image-generator-env/Scripts/python', ["src/python/generate_image.py", prompt, name, finishStep.toString()]);
 
     await new Promise(resolve => {
+        t.stdout.on('data', (data: string) => {
+            data = data.toString();
+            console.log(`stdout: ${data}`);
+
+            //Check there is "step: " in the data
+            if (data.includes("step: ")) {
+                const step = parseInt(data.split("step: ")[1].split("\n")[0]);
+
+                //If last step, set status "finalizing..."
+                if (step + 1 == finishStep) {
+                    currentStateImageGeneration.status = "Finalizing image...";
+                } else {
+                    currentStateImageGeneration.status = `Generating image... (${step + 1}/${finishStep})`;
+                }
+            }
+        });
         t.on('exit', resolve);
     });
 }
 
 
 export async function testDalleLocal() {
-    console.log("testDalleLocal")
         // const prompt = "'J' symbol sprite for an online slot machine, black background, 256x256px, a dark theme of batman"
 
         const prompt = `Generate a striking image using DALL·E 3 that features a wild symbol sprite for an online slot machine. The background should be a deep black, creating a stark contrast to highlight the main elements. The wild symbol should be a dynamic and eye-catching sprite, incorporating vibrant colors and intricate details to evoke a sense of excitement.
@@ -117,7 +191,6 @@ Feel free to iterate on the results, refining the prompt based on the generated 
 
 
     await GenerateImage(prompt, "dalle.png");
-    console.log("testDalleLocal done")
 
 
 }

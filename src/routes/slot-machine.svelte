@@ -4,6 +4,7 @@
 	import PlayerBar from './player-bar.svelte';
 	import ImageGeneratorBar from './image-generator-bar.svelte';
 	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
+	import { enhance } from '$app/forms';
 	
 
 	/** @type {import('./$types').PageData} */
@@ -170,14 +171,17 @@
 
 <div class="container justify-center mx-auto flex flex-col text-center">
 	
-	<label class="label">
-		<span>Select a theme</span>
-		<select class="select" bind:value={currentConfig.name}>
-			{#each allConfigs as config}
-				<option value={config}>{config}</option>
-			{/each}
-		</select>
-	</label>
+	<form method="post" use:enhance>
+		<label class="label">
+			<span>Select a theme</span>
+			<select class="select" bind:value={currentConfig.name} onchange="this.form.submit()" name="themeChoose">
+				{#each allConfigs as config}
+					<option value={config}>{config}</option>
+				{/each}
+			</select>
+		</label>
+	</form>
+	
 	
 	<div class="slot-machine justify-center mx-auto">
 		<div class="reel">
