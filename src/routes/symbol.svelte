@@ -56,7 +56,7 @@
 		style="transform: translateY({$yPos - initY}px);"
 		class="symbol flex justify-center items-center text-3xl"
 	>
-		<div class="symbol-image" style="background-image: url('{symbol?.image}');">
+		<div class="symbol-image" style='background-image: url("{symbol?.image}");'>
 			{symbol ? (symbol.image ? '' : symbol.name) : ''}
 		</div>
 	</div>

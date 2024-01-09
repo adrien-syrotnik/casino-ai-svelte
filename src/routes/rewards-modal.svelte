@@ -11,7 +11,7 @@
 
 	// Base Classes
 	const cBase = 'relative w-modal-wide shadow-xl';
-	const cButton = 'absolute -top-3 -right-3 z-1 btn-icon variant-filled';
+	const cButton = 'absolute mt-1 -right-5 z-1 btn-icon variant-filled';
 </script>
 
 {#if $modalStore[0]}
@@ -46,3 +46,20 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/* :global(.modal-backdrop) {
+		overflow-y: unset;
+	}
+	:global(.modal-transition) {
+		overflow-y: unset;
+	}
+
+	:global(body) {
+		overflow: auto;
+	}
+
+	.modal-example-form {
+		overflow-y: scroll;
+	} */
+</style>

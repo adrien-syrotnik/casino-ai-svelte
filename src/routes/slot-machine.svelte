@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SlotReel from './slot-reel.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import PlayerBar from './player-bar.svelte';
 	import ImageGeneratorBar from './image-generator-bar.svelte';
 	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
@@ -79,6 +79,37 @@
 	let bet = 200;
 
 	let spinEnabled = true;
+
+	let autoSpinLeft = 0;
+	let autoSpinTimeout: any = null;
+	function StartAutoSpin(numberOfTime:number) {
+
+		if(numberOfTime <= 0) {
+			StopAutoSpin();
+			return;
+		}
+
+		//start auto spin
+		autoSpinLeft = numberOfTime;
+		SpinAllDelay();
+
+		//start auto spin timeout
+		autoSpinTimeout = setTimeout(() => {
+			if (autoSpinLeft > 0) {
+				StartAutoSpin(autoSpinLeft);
+			}
+		}, 3000);
+
+		//decrement auto spin left
+		autoSpinLeft--;
+	}
+
+	function StopAutoSpin() {
+		clearTimeout(autoSpinTimeout);
+		autoSpinTimeout = null;
+		autoSpinLeft = 0;
+	}
+
 
 	function SpinAllDelay(delayBetween: number = 100) {
 		if (balance < bet) {
@@ -180,6 +211,11 @@
 	let currentWinLineSymbol = '';
 	let currentWinLineReward = 0;
 	let currentWinLineNumberOfSymbols = 0;
+
+	onDestroy(() => {
+		clearTimeout(winLinesAnimationTimeout);
+		clearTimeout(autoSpinTimeout);
+	});
 </script>
 
 <div class="container justify-center mx-auto flex flex-col text-center">
@@ -217,8 +253,6 @@
 		</div>
 	</div>
 
-	<button style="width: 100px;" class="btn variant-filled-warning" on:click={() => modalStore.trigger(modal)}>See reward</button>
-
 	<div class="flex justify-center" style="height: 20px;">
 		{#if currentWinLineSymbol != ''}
 			Win Line:&nbsp;<img
@@ -235,7 +269,10 @@
 		bind:win={reward}
 		bind:spinEnabled
 		bind:balance
+		bind:autoSpinLeft
 		on:spin={() => SpinAllDelay()}
+		on:showRewards={() => modalStore.trigger(modal)}
+		on:autoSpin={(numberOfTime) => StartAutoSpin(numberOfTime.detail)}
 	/>
 
 	<ImageGeneratorBar />
