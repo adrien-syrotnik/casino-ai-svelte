@@ -68,7 +68,7 @@
     } */
 
 	:global(.symbol-image) {
-		background-size: 80px 80px;
+		background-size: 160px 160px;
 		background-repeat: no-repeat;
 		background-position: center;
 		width: 100%;
@@ -86,17 +86,17 @@
 	}
 	@keyframes scale {
 		0% {
-			background-size: 80px 80px;
+			background-size: 160px 160px;
 		}
 		100% {
-			background-size: 100px 100px;
+			background-size: 200px 200px;
 		}
 	}
 	
 	:global(.symbol-image.win) {
 		border: 3px solid red;
 		animation: spin 2s linear;
-		background-size: 100px 100px;
+		background-size: 200px 200px;
 		transition: background-size 0.5s ease-in-out;
 	}
 

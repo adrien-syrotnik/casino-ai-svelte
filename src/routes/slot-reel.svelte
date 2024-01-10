@@ -28,7 +28,7 @@
 			const symbol = (await response.json()) as SlotSymbol;
 
 			SymbolsNodes.push({
-				initY: 100,
+				initY: 200,
 				spinY: 2000,
 				symbol: symbol
 			});
@@ -62,7 +62,7 @@
 			for (let i = 0; i < 25; i++) {
 				if (i > 19) {
 					SymbolsNodesTemp.push({
-						initY: 2100,
+						initY: 2200,
 						spinY: 2000,
 						// duration: 5000,
 						symbol: last5Symbols[i - 20].symbol
@@ -77,7 +77,7 @@
 
 					const symbol = (await response.json()) as SlotSymbol;
 					SymbolsNodesTemp.push({
-						initY: 2100,
+						initY: 2200,
 						spinY: 2000,
 						// duration: 5000,
 						symbol: symbol

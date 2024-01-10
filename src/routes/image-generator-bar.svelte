@@ -18,7 +18,7 @@
 			? new Date(localStorage.getItem('start_time_date')!)
 			: new Date();
 		openAPIKey = localStorage.getItem('openAPIKey') || '';
-		useOpenAPI = Boolean(localStorage.getItem('useOpenAPI'));
+		useOpenAPI = localStorage.getItem('useOpenAPI') == 'true';
 	});
 
 	let colorValue = '#ff0000';
@@ -79,7 +79,7 @@
 	async function tryCreateNewTheme() {
 		const theme = {
 			themePrompt: inputText,
-			precision: 40,
+			precision: 20,
 			useOpenAPI,
 			openAPIKey
 		};
@@ -127,7 +127,8 @@
 	<input bind:value={inputText} class="input" type="text" placeholder="Input" />
 </label>
 
-<div class="flex">
+<div class="flex mt-3">
+	{useOpenAPI}
 	<SlideToggle checked={useOpenAPI} on:change={ToggleOpenAPI} name="slider-label"
 		>Use OpenAPI</SlideToggle
 	>

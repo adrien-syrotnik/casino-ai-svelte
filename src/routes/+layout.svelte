@@ -23,6 +23,7 @@
 
 	import { Modal, initializeStores } from '@skeletonlabs/skeleton';
 	import RewardsModal from './rewards-modal.svelte';
+	import AnimationWin from './animation-win.svelte';
 
 	initializeStores();
 
@@ -31,6 +32,20 @@
 	};
 </script>
 
+
+<AnimationWin></AnimationWin>
+
 <Modal components={modalRegistry} />
 
 <slot />
+
+<style>
+	/* background image fixed */
+	:global(body) {
+		background-image: url('/logo2-bg.jpg');
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-size: cover;
+	}
+
+</style>

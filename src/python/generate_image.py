@@ -20,11 +20,16 @@ if(len(args) > 2):
 
 # print(prompt)
         
-# pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')  
+pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')  
 # pipeline = AutoPipelineForText2Image.from_pretrained('openskyml/dalle-3-xl', torch_dtype=torch.float16).to('cuda')  
 # pipeline = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", use_safetensors=True)
     
-pipeline =  AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to('cuda')
+
+# pipeline =  AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to('cuda')
+    
+# pipeline =  AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to('cuda')
+
+
 # pipeline = DiffusionPipeline.from_pretrained("openskyml/dalle-3-xl", use_safetensors=True).to('cuda')
 # pipeline = StableDiffusionPipeline.from_single_file(
 #     "https://huggingface.co/openskyml/dalle-3-xl/blob/main/Dall-e_3_0.3-v2.safetensors"

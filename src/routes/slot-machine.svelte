@@ -6,6 +6,8 @@
 	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
 	import { enhance } from '$app/forms';
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { triggerClose, triggerWin } from '$lib/win-modal-store';
+
 
 	const modalStore = getModalStore();
 
@@ -67,7 +69,12 @@
 		await new Promise((resolve) => setTimeout(resolve, 1));
 	}
 
-	onMount(() => {});
+	let localStorageLoaded = false;
+
+	onMount(() => {
+		if (localStorage.getItem('balance')) balance = Number(localStorage.getItem('balance')!);
+		localStorageLoaded = true;
+	});
 
 	function SpinReels(reel: number) {
 		Slotreel[reel].spinAllSymbols();
@@ -97,7 +104,7 @@
 			if (autoSpinLeft > 0) {
 				StartAutoSpin(autoSpinLeft);
 			}
-		}, 3000);
+		}, 2000);
 
 		//decrement auto spin left
 		autoSpinLeft--;
@@ -120,6 +127,7 @@
 		winLinesAnimationTab = [];
 		indexWinLine = 0;
 
+		currentBet = bet;
 		balance -= bet;
 
 		SpinReels(0);
@@ -165,8 +173,16 @@
 				reward: number;
 			} = await response.json();
 
+			if(result.reward > 5) {
+				triggerWin.set({ win:result.reward, bet});
+				await WaitForWinClose();
+			}
+				
+
 			reward = result.reward * bet;
 			balance += reward;
+
+			localStorage.setItem('balance', balance.toString());
 
 			//Check that balance is decimal fixed to 2
 			balance = Math.round(balance * 100) / 100;
@@ -189,7 +205,7 @@
 			}
 
 			spinEnabled = true;
-		}, 2000);
+		}, 1200);
 	}
 
 	let winLinesAnimationTab: {
@@ -218,88 +234,114 @@
 	let currentWinLineReward = 0;
 	let currentWinLineNumberOfSymbols = 0;
 
+	let currentBet = 0;
+
 	onDestroy(() => {
 		clearTimeout(winLinesAnimationTimeout);
 		clearTimeout(autoSpinTimeout);
 	});
+
+	let isWinModalOpen = false;
+
+	async function WaitForWinClose() {
+		isWinModalOpen = true;
+		let unsubscribe : any;
+		await new Promise((resolve) => {
+			unsubscribe = triggerClose.subscribe(() => {
+				isWinModalOpen = false;
+				resolve('');
+			});
+		});
+		unsubscribe();
+	}
 </script>
 
 <div class="container justify-center mx-auto flex flex-col text-center">
-	<form method="post" use:enhance>
-		<label class="label">
-			<span>Select a theme</span>
-			<select
-				class="select"
-				bind:value={currentConfig.name}
-				onchange="this.form.submit()"
-				name="themeChoose"
-			>
-				{#each allConfigs as config}
-					<option value={config}>{config}</option>
-				{/each}
-			</select>
-		</label>
-	</form>
+	{#if localStorageLoaded}
+		<form method="post" use:enhance>
+			<label class="label">
+				<span>Select a theme</span>
+				<select
+					class="select"
+					bind:value={currentConfig.name}
+					onchange="this.form.submit()"
+					name="themeChoose"
+				>
+					{#each allConfigs as config}
+						<option value={config}>{config}</option>
+					{/each}
+				</select>
+			</label>
+		</form>
 
-	<div class="slot-machine justify-center mx-auto">
-		<div class="reel">
-			<SlotReel bind:this={Slotreel[0]} />
+		<div class="slot-machine justify-center mx-auto">
+			<div class="reel">
+				<SlotReel bind:this={Slotreel[0]} />
+			</div>
+			<div class="reel">
+				<SlotReel bind:this={Slotreel[1]} />
+			</div>
+			<div class="reel">
+				<SlotReel bind:this={Slotreel[2]} />
+			</div>
+			<div class="reel">
+				<SlotReel bind:this={Slotreel[3]} />
+			</div>
+			<div class="reel">
+				<SlotReel bind:this={Slotreel[4]} />
+			</div>
 		</div>
-		<div class="reel">
-			<SlotReel bind:this={Slotreel[1]} />
-		</div>
-		<div class="reel">
-			<SlotReel bind:this={Slotreel[2]} />
-		</div>
-		<div class="reel">
-			<SlotReel bind:this={Slotreel[3]} />
-		</div>
-		<div class="reel">
-			<SlotReel bind:this={Slotreel[4]} />
-		</div>
-	</div>
 
-	<div class="flex justify-center" style="height: 20px;">
-		{#if currentWinLineSymbol != ''}
-			Win Line:&nbsp;<img
-				style="width: 20px; height: 20px;"
-				src={SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
-				alt=""
-			/>
-			x {currentWinLineNumberOfSymbols} = {currentWinLineReward} x {bet}€ = {currentWinLineReward * bet}€
-		{:else if reward > 0}
-			Win:&nbsp;{reward}€
-		{/if}
-	</div>
+		<div class="flex justify-center" style="height: 20px;">
+			{#if currentWinLineSymbol != ''}
+				Win Line:&nbsp;<img
+					style="width: 20px; height: 20px;"
+					src={SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
+					alt=""
+				/>
+				x {currentWinLineNumberOfSymbols} = {currentWinLineReward} x {currentBet}€ = {currentWinLineReward *
+					currentBet}€
+			{:else if reward > 0 && spinEnabled == true}
+				Win:&nbsp;{reward}€
+			{/if}
+		</div>
 
-	<PlayerBar
-		bind:bet
-		bind:win={reward}
-		bind:spinEnabled
-		bind:balance
-		bind:autoSpinLeft
-		on:spin={() => SpinAllDelay()}
-		on:showRewards={() => modalStore.trigger(modal)}
-		on:autoSpin={(numberOfTime) => StartAutoSpin(numberOfTime.detail)}
-	/>
+		<PlayerBar
+			bind:bet
+			bind:win={reward}
+			bind:spinEnabled
+			bind:balance
+			bind:autoSpinLeft
+			on:spin={() => SpinAllDelay()}
+			on:showRewards={() => modalStore.trigger(modal)}
+			on:autoSpin={(numberOfTime) => StartAutoSpin(numberOfTime.detail)}
+		/>
 
-	<ImageGeneratorBar />
+		<ImageGeneratorBar />
+	{:else}
+		<div class="p-4 space-y-4">
+			<div class="placeholder mt-3" style="height: 40px; border-radius: 10px;"/>
+			<div class="placeholder mx-auto" style="height: 300px; border-radius: 10px; width: 50%;"/>
+			<div class="placeholder" style="height: 40px; border-radius: 10px;"/>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.slot-machine {
+		margin-top: 20px;
 		display: flex;
 		overflow: hidden;
-		background-color: darkblue;
-		width: 560px;
-		height: 320px;
+		background-color: rgba(0, 0, 0, 0.5);
+		width: 1120px;
+		height: 640px;
 		align-items: center;
 		border-radius: 15px;
 	}
 
 	.reel {
-		width: 100px;
-		height: 304px;
+		width: 200px;
+		height: 604px;
 		border: 2px solid #333;
 		margin: 0 5px;
 		background-color: #000;
@@ -314,7 +356,7 @@
 
 	:global(.symbol) {
 		width: 100%;
-		height: 100px;
+		height: 200px;
 		/* margin-bottom: 5px; */
 		/* box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); */
 	}
