@@ -35,8 +35,20 @@
 								<td class="flex justify-center"
 									><img style="width: 200px; height: 200px;" src={symbol.image} alt="" /></td
 								>
-								<td style="font-size: 40px; vertical-align: middle;">x {(symbol.reward * 0.3).toFixed(1)}</td>
-								<td style="font-size: 40px; vertical-align: middle;">x {(symbol.reward * 0.6).toFixed(1)}</td>
+								<td style="font-size: 40px; vertical-align: middle;">
+									{#if symbol.name == 'wild'}
+										-
+									{:else}
+										x {(symbol.reward * 0.2).toFixed(1)}
+									{/if}
+								</td>
+								<td style="font-size: 40px; vertical-align: middle;">
+									{#if symbol.name == 'wild'}
+										-
+									{:else}
+										x {(symbol.reward * 0.4).toFixed(1)}
+									{/if}
+								</td>
 								<td style="font-size: 40px; vertical-align: middle;">x {symbol.reward}</td>
 							</tr>
 						{/each}

@@ -4,7 +4,7 @@
 	import { AppBar } from '@skeletonlabs/skeleton';
 
 	/** @type {import('./$types').PageData} */
-	export let data:any;
+	export let data: any;
 
 	onMount(() => {});
 
@@ -27,9 +27,8 @@
 	</div>
 </div> -->
 
-
-<AppBar gridColumns="grid-cols-1" background={""} slotDefault="place-self-center">
-		<img src="/logo2-bg.jpg" alt="logo" style="width: 150px; border-radius: 50%;" />
+<AppBar gridColumns="grid-cols-1" background={''} slotDefault="place-self-center">
+	<img src="/logo2-bg.jpg" alt="logo" style="width: 150px; border-radius: 50%;" />
 </AppBar>
 
 <SlotMachine bind:data></SlotMachine>

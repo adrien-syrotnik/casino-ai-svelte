@@ -13,7 +13,7 @@
 
 	export function spin() {
 		//Get node position
-		yPos.set(spinY);
+		yPos.set(spinY)
 	}
 
 	export let duration = 5000;
@@ -25,7 +25,7 @@
 
 	let yPos = spring(0, {
 		stiffness: 0.1,
-		damping: 0.1,
+		damping: 0.3,
 		precision: 0.1
 	});
 

@@ -48,11 +48,11 @@ export function getConfig(name: string): SlotConfig {
 export function setConfig(name: string) {
     currentConfig = getConfig(name);
     DEFAULT_SYMBOLS = [
-        { name: '10', reward: 5, image: currentConfig._10 },
-        { name: 'J', reward: 5, image: currentConfig.J },
-        { name: 'Q', reward: 6, image: currentConfig.Q },
-        { name: 'K', reward: 6, image: currentConfig.K },
-        { name: 'A', reward: 7, image: currentConfig.A },
+        { name: '10', reward: 4, image: currentConfig._10 },
+        { name: 'J', reward: 4, image: currentConfig.J },
+        { name: 'Q', reward: 4, image: currentConfig.Q },
+        { name: 'K', reward: 4, image: currentConfig.K },
+        { name: 'A', reward: 4, image: currentConfig.A },
         { name: 'm1', reward: 10, image: currentConfig.m1 },
         { name: 'm2', reward: 12, image: currentConfig.m2 },
         { name: 'm3', reward: 14, image: currentConfig.m3 },
@@ -62,18 +62,19 @@ export function setConfig(name: string) {
     ];
 }
 
+const prob_normal = 93;
 
-const weights_symbols:{ [key: string]: number } = {
-    '10': 100,
-    'J': 100,
-    'Q': 98,
-    'K': 98,
-    'A': 96,
-    'm1': 90,
-    'm2': 85,
-    'm3': 80,
-    'm4': 70,
-    'wild': 20,
+const weights_symbols: { [key: string]: number } = {
+    '10': prob_normal,
+    'J': prob_normal,
+    'Q': prob_normal,
+    'K': prob_normal,
+    'A': prob_normal,
+    'm1': 80,
+    'm2': 75,
+    'm3': 70,
+    'm4': 60,
+    'wild': 40,
 }
 
 
@@ -84,22 +85,40 @@ export let DEFAULT_SYMBOLS: SlotSymbol[] = [];
 setConfig('default');
 
 
+let oldSymbolRand: SlotSymbol = DEFAULT_SYMBOLS[0];
+
 export function getRandSymbol(symbols: SlotSymbol[] = DEFAULT_SYMBOLS): SlotSymbol {
     //Get random symbol using the weights
     //Get total from keys
     const total = Object.values(weights_symbols).reduce((a, b) => a + b, 0);
+
+
     //Get random number between 0 and total
-    const rand = Math.floor(Math.random() * total);
+    let rand = Math.floor(Math.random() * total);
+
+    //Get a random chance to be next the same symbol (30%)
+    if (Math.random() < 0.3) {
+        return oldSymbolRand;
+    }
+
+    //http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5
+    // const responseRandom = await fetch(`http://www.randomnumberapi.com/api/v1.0/random?min=0&max=${total}&count=1`);
+    // const randJSON = await responseRandom.json();
+    // const rand = randJSON[0];
+
+
+
     //Get the symbol from the random number
     let current = 0;
     for (const symbol of symbols) {
         current += weights_symbols[symbol.name];
         if (current >= rand) {
+            oldSymbolRand = symbol;
             return symbol;
         }
     }
     return symbols[0];
-    
+
 
 }
 
@@ -187,7 +206,7 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
         })) {
             lines.push({
                 reelAndRow: line.slice(0, 4).map((row, reel) => [reel, row]),
-                reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.6,
+                reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.4,
                 symbol,
                 numberOfSymbol: 4
             });
@@ -205,7 +224,7 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
         })) {
             lines.push({
                 reelAndRow: line.slice(0, 3).map((row, reel) => [reel, row]),
-                reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.3,
+                reward: DEFAULT_SYMBOLS.find(s => s.name === symbol)!.reward * 0.2,
                 symbol,
                 numberOfSymbol: 3
             });
@@ -224,3 +243,44 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
     return { lines, reward };
 }
 
+
+
+
+//Random part
+// Cette fonction simule un grand nombre de tours pour valider le taux de rendement
+function validatePayoutRatio() {
+    let bestPayout = 0;
+    const trials = 10000000;
+    let totalPayout = 0;
+
+    for (let i = 0; i < trials; i++) {
+        const symbolMatrix = getRandMatrixSymbol();
+        const result = checkLines25(symbolMatrix[0], symbolMatrix[1], symbolMatrix[2], symbolMatrix[3], symbolMatrix[4]);
+        const reward = result.reward;
+        totalPayout += reward;
+
+        if(reward > bestPayout) {
+            bestPayout = reward;
+            console.log(`New best payout: ${bestPayout}`);
+        }
+
+        if(i % (trials / 100) === 0) {
+            console.log(`Progress: ${i / trials * 100}%`);
+        }
+    }
+
+    const calculatedPayoutRatio = totalPayout / trials;
+    console.log(`Calculated Payout Ratio: ${calculatedPayoutRatio}`);
+    console.log(`Best Payout: ${bestPayout}`);
+}
+
+function getRandMatrixSymbol(): string[][] {
+    const matrix = [];
+    for (let i = 0; i < 5; i++) {
+        // matrix.push([drawRandomSymbol().name, drawRandomSymbol().name, drawRandomSymbol().name]);
+        matrix.push([getRandSymbol().name, getRandSymbol().name, getRandSymbol().name]);
+    }
+    return matrix;
+}
+
+// validatePayoutRatio();   
