@@ -48,19 +48,34 @@ export function getConfig(name: string): SlotConfig {
 export function setConfig(name: string) {
     currentConfig = getConfig(name);
     DEFAULT_SYMBOLS = [
-        { name: '10', reward: 80, image: currentConfig._10 },
-        { name: 'J', reward: 80, image: currentConfig.J },
-        { name: 'Q', reward: 100, image: currentConfig.Q },
-        { name: 'K', reward: 100, image: currentConfig.K },
-        { name: 'A', reward: 120, image: currentConfig.A },
-        { name: 'm1', reward: 200, image: currentConfig.m1 },
-        { name: 'm2', reward: 220, image: currentConfig.m2 },
-        { name: 'm3', reward: 260, image: currentConfig.m3 },
-        { name: 'm4', reward: 300, image: currentConfig.m4 },
-        { name: 'wild', reward: 400, image: currentConfig.wild },
+        { name: '10', reward: 5, image: currentConfig._10 },
+        { name: 'J', reward: 5, image: currentConfig.J },
+        { name: 'Q', reward: 6, image: currentConfig.Q },
+        { name: 'K', reward: 6, image: currentConfig.K },
+        { name: 'A', reward: 7, image: currentConfig.A },
+        { name: 'm1', reward: 10, image: currentConfig.m1 },
+        { name: 'm2', reward: 12, image: currentConfig.m2 },
+        { name: 'm3', reward: 14, image: currentConfig.m3 },
+        { name: 'm4', reward: 20, image: currentConfig.m4 },
+        { name: 'wild', reward: 100, image: currentConfig.wild },
         // { name: 'bonus', reward: 700 }
     ];
 }
+
+
+const weights_symbols:{ [key: string]: number } = {
+    '10': 100,
+    'J': 100,
+    'Q': 98,
+    'K': 98,
+    'A': 96,
+    'm1': 90,
+    'm2': 85,
+    'm3': 80,
+    'm4': 70,
+    'wild': 20,
+}
+
 
 
 
@@ -70,19 +85,21 @@ setConfig('default');
 
 
 export function getRandSymbol(symbols: SlotSymbol[] = DEFAULT_SYMBOLS): SlotSymbol {
-    //Get random symbol from reward, more reward = less chance
-    //Calcul weight based on reward
-    const totalWeight = symbols.reduce((acc, symbol) => acc + symbol.reward, 0);
-    const rand = Math.random() * totalWeight;
-    //Get random symbol
-    let acc = 0;
+    //Get random symbol using the weights
+    //Get total from keys
+    const total = Object.values(weights_symbols).reduce((a, b) => a + b, 0);
+    //Get random number between 0 and total
+    const rand = Math.floor(Math.random() * total);
+    //Get the symbol from the random number
+    let current = 0;
     for (const symbol of symbols) {
-        acc += symbol.reward;
-        if (acc >= rand) {
+        current += weights_symbols[symbol.name];
+        if (current >= rand) {
             return symbol;
         }
     }
     return symbols[0];
+    
 
 }
 
@@ -200,6 +217,9 @@ export function checkLines25(reel1: string[], reel2: string[], reel3: string[], 
 
     //Order lines by reward
     lines.sort((a, b) => b.reward - a.reward);
+
+    //Fixed reward to 2 decimals
+    reward = Math.round(reward * 100) / 100;
 
     return { lines, reward };
 }

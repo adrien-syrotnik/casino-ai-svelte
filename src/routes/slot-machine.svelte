@@ -9,8 +9,6 @@
 
 	const modalStore = getModalStore();
 
-
-
 	/** @type {import('./$types').PageData} */
 	export let data;
 
@@ -21,11 +19,10 @@
 	const modal: ModalSettings = {
 		type: 'component',
 		component: 'rewardsModal',
-		meta : {
+		meta: {
 			SYMBOLS: SYMBOLS
 		}
 	};
-	
 
 	let Slotreel = [null, null, null, null, null] as any;
 
@@ -45,7 +42,8 @@
 		});
 
 		currentWinLineSymbol = line.symbol;
-		currentWinLineReward = line.reward;
+		//2 decimals
+		currentWinLineReward = Math.round(line.reward * 100) / 100;
 		currentWinLineNumberOfSymbols = line.numberOfSymbol;
 	}
 
@@ -56,9 +54,11 @@
 				const reel = pos[0];
 				const row = pos[1];
 				//Add class win to the .symbol div, first child of the .reel div
-				const symbolNode = Slotreel[reel].currentSymbolsNode[row].$$.ctx[2];
-				const child = symbolNode.children[0];
-				child.classList.remove('win');
+				if (Slotreel[reel].currentSymbolsNode[row]) {
+					const symbolNode = Slotreel[reel].currentSymbolsNode[row].$$.ctx[2];
+					const child = symbolNode.children[0];
+					child.classList.remove('win');
+				}
 			});
 		});
 		currentWinLineSymbol = '';
@@ -75,16 +75,15 @@
 
 	let reward = 0;
 
-	let balance = 6000;
-	let bet = 200;
+	let balance = 500;
+	let bet = 1;
 
 	let spinEnabled = true;
 
 	let autoSpinLeft = 0;
 	let autoSpinTimeout: any = null;
-	function StartAutoSpin(numberOfTime:number) {
-
-		if(numberOfTime <= 0) {
+	function StartAutoSpin(numberOfTime: number) {
+		if (numberOfTime <= 0) {
 			StopAutoSpin();
 			return;
 		}
@@ -109,7 +108,6 @@
 		autoSpinTimeout = null;
 		autoSpinLeft = 0;
 	}
-
 
 	function SpinAllDelay(delayBetween: number = 100) {
 		if (balance < bet) {
@@ -167,8 +165,11 @@
 				reward: number;
 			} = await response.json();
 
-			reward = result.reward;
-			balance += result.reward;
+			reward = result.reward * bet;
+			balance += reward;
+
+			//Check that balance is decimal fixed to 2
+			balance = Math.round(balance * 100) / 100;
 
 			winLinesAnimationTab = result.lines;
 
@@ -176,6 +177,11 @@
 				result.lines.forEach((line) => {
 					AnimateWinLine(line);
 				});
+
+				currentWinLineReward = reward;
+				currentWinLineNumberOfSymbols = 0;
+				currentWinLineSymbol = '';
+
 				winLinesAnimationTimeout = setTimeout(async () => {
 					await StopAnimateWinLine();
 					AnimateLineIndividually();
@@ -260,7 +266,9 @@
 				src={SYMBOLS.find((s) => s.name == currentWinLineSymbol)?.image}
 				alt=""
 			/>
-			x {currentWinLineNumberOfSymbols} = {currentWinLineReward}€
+			x {currentWinLineNumberOfSymbols} = {currentWinLineReward} x {bet}€ = {currentWinLineReward * bet}€
+		{:else if reward > 0}
+			Win:&nbsp;{reward}€
 		{/if}
 	</div>
 

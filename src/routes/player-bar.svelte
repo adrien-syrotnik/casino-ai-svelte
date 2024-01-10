@@ -18,14 +18,14 @@
 
 	export let autoSpinLeft = 0;
 
-	export let bet = 200;
+	export let bet = 1;
 
 	function increment() {
-		if (bet + 20 < balance) bet += 20;
+		if (bet + 1 < balance) bet += 1;
 	}
 
 	function decrement() {
-		if (bet > 20) bet -= 20;
+		if (bet > 1) bet -= 1;
 	}
 
 	export let win = 0;

@@ -35,9 +35,9 @@
 								<td class="flex justify-center"
 									><img style="width: 200px; height: 200px;" src={symbol.image} alt="" /></td
 								>
-								<td style="font-size: 40px; vertical-align: middle;">{symbol.reward * 0.3}€</td>
-								<td style="font-size: 40px; vertical-align: middle;">{symbol.reward * 0.6}€</td>
-								<td style="font-size: 40px; vertical-align: middle;">{symbol.reward}€</td>
+								<td style="font-size: 40px; vertical-align: middle;">x {(symbol.reward * 0.3).toFixed(1)}</td>
+								<td style="font-size: 40px; vertical-align: middle;">x {(symbol.reward * 0.6).toFixed(1)}</td>
+								<td style="font-size: 40px; vertical-align: middle;">x {symbol.reward}</td>
 							</tr>
 						{/each}
 					</tbody>

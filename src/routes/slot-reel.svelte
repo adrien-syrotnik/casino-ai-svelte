@@ -52,14 +52,16 @@
 		// console.log(last5Symbols.map((s) => s.symbol.name));
 
 		//reset SymbolsNodes
-		SymbolsNodes = [];
-		SymbolsNodes = [...SymbolsNodes];
 
 		setTimeout(async () => {
+			// SymbolsNodes = [];
+			// SymbolsNodes = [...SymbolsNodes];
+			let SymbolsNodesTemp: any[] = [];
+
 			//Init 25 symbols next symbols with last 5 symbols at the end
 			for (let i = 0; i < 25; i++) {
 				if (i > 19) {
-					SymbolsNodes.push({
+					SymbolsNodesTemp.push({
 						initY: 2100,
 						spinY: 2000,
 						// duration: 5000,
@@ -74,7 +76,7 @@
 					});
 
 					const symbol = (await response.json()) as SlotSymbol;
-					SymbolsNodes.push({
+					SymbolsNodesTemp.push({
 						initY: 2100,
 						spinY: 2000,
 						// duration: 5000,
@@ -84,19 +86,22 @@
 			}
 
 			// Set current symbols (1 - 3)
-			currentSymbols = SymbolsNodes.slice(1, 4).map((s) => s.symbol.name);
+			currentSymbols = SymbolsNodesTemp.slice(1, 4).map((s) => s.symbol.name);
 
 			// console.log(SymbolsNodes.map((s) => s.symbol.name));
 
-			//Refresh symbols
-			SymbolsNodes = [...SymbolsNodes];
+			SymbolsNodes = [];
 
 			setTimeout(() => {
-				currentSymbolsNode = SymbolsNodes.slice(1, 4).map((s) => s.node);
+				//Refresh symbols
+				SymbolsNodes = [...SymbolsNodesTemp];
+				setTimeout(() => {
+					currentSymbolsNode = SymbolsNodes.slice(1, 4).map((s) => s.node);
 
-				//Spin all symbols
-				SymbolsNodes.forEach((symbolNode, i) => {
-					symbolNode.node.spin();
+					//Spin all symbols
+					SymbolsNodes.forEach((symbolNode, i) => {
+						symbolNode.node.spin();
+					});
 				});
 			});
 		});
