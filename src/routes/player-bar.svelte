@@ -51,7 +51,7 @@
 	>
 	<!-- value -->
 	<div class="mx-2 text-2xl">
-		<span>
+		<span contenteditable="true"  bind:textContent={bet}>
 			{bet}
 		</span>
 		<br />

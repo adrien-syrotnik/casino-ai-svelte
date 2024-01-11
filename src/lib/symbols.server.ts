@@ -48,16 +48,16 @@ export function getConfig(name: string): SlotConfig {
 export function setConfig(name: string) {
     currentConfig = getConfig(name);
     DEFAULT_SYMBOLS = [
-        { name: '10', reward: 4, image: currentConfig._10 },
-        { name: 'J', reward: 4, image: currentConfig.J },
-        { name: 'Q', reward: 4, image: currentConfig.Q },
-        { name: 'K', reward: 4, image: currentConfig.K },
-        { name: 'A', reward: 4, image: currentConfig.A },
+        { name: '10', reward: 6, image: currentConfig._10 },
+        { name: 'J', reward: 6, image: currentConfig.J },
+        { name: 'Q', reward: 6, image: currentConfig.Q },
+        { name: 'K', reward: 6, image: currentConfig.K },
+        { name: 'A', reward: 6, image: currentConfig.A },
         { name: 'm1', reward: 10, image: currentConfig.m1 },
-        { name: 'm2', reward: 12, image: currentConfig.m2 },
-        { name: 'm3', reward: 14, image: currentConfig.m3 },
-        { name: 'm4', reward: 20, image: currentConfig.m4 },
-        { name: 'wild', reward: 100, image: currentConfig.wild },
+        { name: 'm2', reward: 15, image: currentConfig.m2 },
+        { name: 'm3', reward: 20, image: currentConfig.m3 },
+        { name: 'm4', reward: 30, image: currentConfig.m4 },
+        { name: 'wild', reward: 300, image: currentConfig.wild },
         // { name: 'bonus', reward: 700 }
     ];
 }
@@ -70,11 +70,11 @@ const weights_symbols: { [key: string]: number } = {
     'Q': prob_normal,
     'K': prob_normal,
     'A': prob_normal,
-    'm1': 80,
-    'm2': 75,
-    'm3': 70,
-    'm4': 60,
-    'wild': 50,
+    'm1': 85,
+    'm2': 80,
+    'm3': 75,
+    'm4': 65,
+    'wild': 80,
 }
 
 

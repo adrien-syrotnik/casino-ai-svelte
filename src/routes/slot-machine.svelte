@@ -122,6 +122,7 @@
 
 	function SpinAllDelay(delayBetween: number = 100) {
 		if (balance < bet) {
+			alert('Not enough money');
 			return;
 		}
 
