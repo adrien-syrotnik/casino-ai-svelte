@@ -16,7 +16,9 @@ if(len(args) > 1):
 num_inference_steps = 5
 if(len(args) > 2):
     num_inference_steps = int(args[2])
-    
+
+
+
 
 # print(prompt)
         

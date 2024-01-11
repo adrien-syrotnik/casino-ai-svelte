@@ -19,6 +19,7 @@
 			: new Date();
 		openAPIKey = localStorage.getItem('openAPIKey') || '';
 		useOpenAPI = localStorage.getItem('useOpenAPI') == 'true';
+		useBetterPrompt = localStorage.getItem('useBetterPrompt') == 'true';
 	});
 
 	let colorValue = '#ff0000';
@@ -81,7 +82,8 @@
 			themePrompt: inputText,
 			precision: 20,
 			useOpenAPI,
-			openAPIKey
+			openAPIKey,
+			useBetterPrompt
 		};
 
 		//Set local storage
@@ -110,6 +112,12 @@
 		refreshProgress();
 	}
 
+	let useBetterPrompt = false;
+	let ToggleBetterPrompt = () => {
+		useBetterPrompt = !useBetterPrompt;
+		localStorage.setItem('useBetterPrompt', useBetterPrompt.toString());
+	};
+
 	let ToggleOpenAPI = () => {
 		useOpenAPI = !useOpenAPI;
 		localStorage.setItem('useOpenAPI', useOpenAPI.toString());
@@ -127,14 +135,17 @@
 	<input bind:value={inputText} class="input" type="text" placeholder="Input" />
 </label>
 
-<div class="flex mt-3">
-	{useOpenAPI}
+<div class="flex mt-3" style="height: 50px;">
 	<SlideToggle checked={useOpenAPI} on:change={ToggleOpenAPI} name="slider-label"
-		>Use OpenAPI</SlideToggle
+		>Use DallE</SlideToggle
 	>
 
-	{#if useOpenAPI}
-		<label class="label flex" transition:fade style="width: 100%;">
+	<SlideToggle checked={useBetterPrompt} on:change={ToggleBetterPrompt} name="slider-label"
+		>Better Prompt (use OpenAI)</SlideToggle
+	>
+
+	{#if useOpenAPI || useBetterPrompt}
+		<label class="label flex" style="width: 80%;">
 			<span>OpenAI API Key</span>
 			<input
 				bind:value={openAPIKey}
@@ -144,6 +155,9 @@
 				on:change={() => localStorage.setItem('openAPIKey', openAPIKey)}
 			/>
 		</label>
+	{:else}
+		<div class="label flex" style="width: 80%;">
+		</div>
 	{/if}
 </div>
 

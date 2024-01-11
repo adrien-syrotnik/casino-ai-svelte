@@ -1,12 +1,22 @@
 <script lang="ts">
 	import { triggerClose, triggerWin } from '$lib/win-modal-store';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { cubicInOut, cubicOut, quintOut } from 'svelte/easing';
-	import { tweened } from 'svelte/motion';
+	import { tweened, type Unsubscriber } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
 
+	let audioBIGWIN: HTMLAudioElement;
+	let audioMEGAWIN: HTMLAudioElement;
+	let audioHUGEWIN: HTMLAudioElement;
+	let audioULTRAWIN: HTMLAudioElement;
+	let audioJACKPOT: HTMLAudioElement;
+	let audioMONSTERWIN: HTMLAudioElement;
+	let audioIMPOSSIBLE: HTMLAudioElement;
+
+	let unsubscribeTriggerWin: Unsubscriber;
+
 	onMount(() => {
-		triggerWin.subscribe(async (win) => {
+		unsubscribeTriggerWin = triggerWin.subscribe(async (win) => {
 			if (win.win > 0) {
 				rewardTime.set(0, { duration: 0 });
 				sizeTime.set(100, { duration: 0 });
@@ -23,7 +33,7 @@
 				font_color: '#FFD700',
 				size_start: 100,
 				size_end: 120,
-				song: new Audio('musics/1.wav')
+				song: audioBIGWIN
 			},
 			{
 				name: 'MEGA WIN!',
@@ -32,7 +42,7 @@
 				font_color: ' #FFA500',
 				size_start: 110,
 				size_end: 130,
-				song: new Audio('musics/2.wav')
+				song: audioMEGAWIN
 			},
 			{
 				name: 'HUGE WIN!',
@@ -41,7 +51,7 @@
 				font_color: '#FF0000',
 				size_start: 120,
 				size_end: 140,
-				song: new Audio('musics/3.wav')
+				song: audioHUGEWIN
 			},
 			{
 				name: 'ULTRA WIN!',
@@ -50,7 +60,7 @@
 				font_color: '(#800080',
 				size_start: 130,
 				size_end: 150,
-				song: new Audio('musics/4.wav')
+				song: audioULTRAWIN
 			},
 			{
 				name: 'JACKPOT!',
@@ -59,7 +69,7 @@
 				font_color: '#DAA520',
 				size_start: 140,
 				size_end: 160,
-				song: new Audio('musics/end.mp3'),
+				song: audioJACKPOT,
 				volume: 1
 			},
 			{
@@ -69,7 +79,7 @@
 				font_color: '#008000',
 				size_start: 150,
 				size_end: 170,
-				song: new Audio('musics/end.mp3'),
+				song: audioMONSTERWIN,
 				volume: 1,
 				playbackRate: 1.5
 			},
@@ -80,7 +90,7 @@
 				font_color: '#00FFFF',
 				size_start: 160,
 				size_end: 180,
-				song: new Audio('musics/end.mp3'),
+				song: audioIMPOSSIBLE,
 				volume: 1,
 				playbackRate: 2
 			}
@@ -244,7 +254,20 @@
 	}
 
 	let nextSpinFunction: any;
+
+	onDestroy(() => {
+		if(unsubscribeTriggerWin)
+			unsubscribeTriggerWin();
+	});
 </script>
+
+<audio src="musics/1.wav" bind:this={audioBIGWIN}></audio>
+<audio src="musics/2.wav" bind:this={audioMEGAWIN}></audio>
+<audio src="musics/3.wav" bind:this={audioHUGEWIN}></audio>
+<audio src="musics/4.wav" bind:this={audioULTRAWIN}></audio>
+<audio src="musics/end.mp3" bind:this={audioJACKPOT}></audio>
+<audio src="musics/end.mp3" bind:this={audioMONSTERWIN}></audio>
+<audio src="musics/end.mp3" bind:this={audioIMPOSSIBLE}></audio>
 
 {#if show}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -259,13 +282,13 @@
 			class="number-win"
 			style="font-size: {$sizeTime +
 				$sizeTextTransition}px; color: {color}; opacity: 1; height: {$sizeTime +
-				$sizeTextTransition}px; font-family: 'Casino3D-Italic';"
+				$sizeTextTransition}px; font-family: 'CasinoFlatShadow-Italic';"
 		>
 			{winText}
 		</div>
 		<div class="number-win" style="font-size: {$sizeTime}px; color: {color}; opacity: 1;">
 			<!-- {Math.round($rewardTime * 100) / 100} € -->
-			{($rewardTime * bet).toFixed(2)}<span style="font-family: 'Casino3D-Italic';">€</span>
+			{($rewardTime * bet).toFixed(2)}<span style="font-family: 'Graduate-9WoB';">€</span>
 		</div>
 	</div>
 {/if}
@@ -282,11 +305,6 @@
 	}
 
 	@font-face {
-		font-family: 'CasinoShadow-Italic';
-		src: url('fonts/CasinoShadow-Italic.ttf');
-	}
-
-	@font-face {
 		font-family: 'Casino3D-Italic';
 		src: url('fonts/Casino3D-Italic.ttf');
 	}
@@ -294,6 +312,11 @@
 	@font-face {
 		font-family: 'SuperstarM54-Zq6K';
 		src: url('fonts/SuperstarM54-Zq6K.ttf');
+	}
+
+	@font-face {
+		font-family: 'Graduate-9WoB';
+		src: url('fonts/new/Graduate-9WoB.ttf');
 	}
 
 	#modal-reward {

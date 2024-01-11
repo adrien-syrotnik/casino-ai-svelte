@@ -28,7 +28,7 @@
 			const symbol = (await response.json()) as SlotSymbol;
 
 			SymbolsNodes.push({
-				initY: 200,
+				initY: 150,
 				spinY: 2000,
 				symbol: symbol
 			});
@@ -62,7 +62,7 @@
 			for (let i = 0; i < 25; i++) {
 				if (i > 19) {
 					SymbolsNodesTemp.push({
-						initY: 2200,
+						initY: 2150,
 						spinY: 2000,
 						// duration: 5000,
 						symbol: last5Symbols[i - 20].symbol
@@ -77,7 +77,7 @@
 
 					const symbol = (await response.json()) as SlotSymbol;
 					SymbolsNodesTemp.push({
-						initY: 2200,
+						initY: 2150,
 						spinY: 2000,
 						// duration: 5000,
 						symbol: symbol
@@ -104,9 +104,19 @@
 					});
 				});
 			});
+
+			setTimeout(() => {
+				//After spin, play sound
+				audioReel.currentTime = 0;
+				audioReel.play();
+			}, 100);
 		});
 	}
+
+	let audioReel: HTMLAudioElement;
 </script>
+
+<audio bind:this={audioReel} id="reelSound" src="/musics/click-grave.ogg" volume="0.1" preload="auto"></audio>
 
 <div class="symbols">
 	{#each SymbolsNodes as SymbolNode}

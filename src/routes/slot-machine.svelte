@@ -7,7 +7,13 @@
 	import { enhance } from '$app/forms';
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { triggerClose, triggerWin } from '$lib/win-modal-store';
+	import { tweened } from 'svelte/motion';
+	import { cubicInOut } from 'svelte/easing';
 
+	onMount(() => {
+		if (localStorage.getItem('balance')) balance = Number(localStorage.getItem('balance')!);
+		localStorageLoaded = true;
+	});
 
 	const modalStore = getModalStore();
 
@@ -63,18 +69,16 @@
 				}
 			});
 		});
+
+		await new Promise((resolve) => setTimeout(resolve, 20));
+
 		currentWinLineSymbol = '';
 		currentWinLineReward = 0;
 		currentWinLineNumberOfSymbols = 0;
-		await new Promise((resolve) => setTimeout(resolve, 1));
+		
 	}
 
 	let localStorageLoaded = false;
-
-	onMount(() => {
-		if (localStorage.getItem('balance')) balance = Number(localStorage.getItem('balance')!);
-		localStorageLoaded = true;
-	});
 
 	function SpinReels(reel: number) {
 		Slotreel[reel].spinAllSymbols();
@@ -120,6 +124,10 @@
 		if (balance < bet) {
 			return;
 		}
+
+		//Play sound
+		audioSpin.currentTime = 0;
+		audioSpin.play();
 
 		clearTimeout(winLinesAnimationTimeout);
 		StopAnimateWinLine();
@@ -173,11 +181,29 @@
 				reward: number;
 			} = await response.json();
 
-			if(result.reward > 5) {
-				triggerWin.set({ win:result.reward, bet});
+			if (result.reward > 8) {
+				//Wait 2 seconds for playing rising sound
+				audioRise.currentTime = 0.5;
+				await audioRise.play();
+				//zoom in
+				zoomWin.set(1.1, { duration: 500, easing: cubicInOut });
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				zoomWin.set(0.95, { duration: 500, easing: cubicInOut });
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				//zoom out
+				zoomWin.set(1, { duration: 200, easing: cubicInOut });
+				audioRise.pause();
+				audioRise.currentTime = 0;
+
+				triggerWin.set({ win: result.reward, bet });
 				await WaitForWinClose();
+			} else if (result.reward > 0) {
+				audioSmallWin.currentTime = 0;
+				audioSmallWin.play();
 			}
-				
+			
 
 			reward = result.reward * bet;
 			balance += reward;
@@ -243,18 +269,34 @@
 
 	let isWinModalOpen = false;
 
+	let audioRise: HTMLAudioElement;
+	let audioSpin: HTMLAudioElement;
+	let audioSmallWin: HTMLAudioElement;
+
+	let zoomWin = tweened(1, { duration: 1000, easing: cubicInOut });
+	let slot_width = 765;
+	let slot_height = 480;
+
 	async function WaitForWinClose() {
+		triggerClose.set(0);
 		isWinModalOpen = true;
-		let unsubscribe : any;
+		let unsubscribe: any;
+
 		await new Promise((resolve) => {
-			unsubscribe = triggerClose.subscribe(() => {
-				isWinModalOpen = false;
-				resolve('');
+			unsubscribe = triggerClose.subscribe((event) => {
+				if (event == 1) {
+					isWinModalOpen = false;
+					resolve('');
+				}
 			});
 		});
 		unsubscribe();
 	}
 </script>
+
+<audio bind:this={audioSpin} id="spinSound" src="/musics/click.ogg" volume="1" preload="auto"></audio>
+<audio bind:this={audioRise} id="riseSound" src="/musics/rise.ogg" preload="auto"></audio>
+<audio bind:this={audioSmallWin} id="smallWinSound" src="/musics/small_win.mp3" preload="auto"></audio>
 
 <div class="container justify-center mx-auto flex flex-col text-center">
 	{#if localStorageLoaded}
@@ -274,7 +316,10 @@
 			</label>
 		</form>
 
-		<div class="slot-machine justify-center mx-auto">
+		<div
+			class="slot-machine justify-center mx-auto"
+			style="width: {slot_width * $zoomWin}px; height: {slot_height * $zoomWin}px;"
+		>
 			<div class="reel">
 				<SlotReel bind:this={Slotreel[0]} />
 			</div>
@@ -320,9 +365,9 @@
 		<ImageGeneratorBar />
 	{:else}
 		<div class="p-4 space-y-4">
-			<div class="placeholder mt-3" style="height: 40px; border-radius: 10px;"/>
-			<div class="placeholder mx-auto" style="height: 300px; border-radius: 10px; width: 50%;"/>
-			<div class="placeholder" style="height: 40px; border-radius: 10px;"/>
+			<div class="placeholder mt-3" style="height: 40px; border-radius: 10px;" />
+			<div class="placeholder mx-auto" style="height: 300px; border-radius: 10px; width: 50%;" />
+			<div class="placeholder" style="height: 40px; border-radius: 10px;" />
 		</div>
 	{/if}
 </div>
@@ -332,16 +377,16 @@
 		margin-top: 20px;
 		display: flex;
 		overflow: hidden;
-		background-color: rgba(0, 0, 0, 0.5);
-		width: 1120px;
-		height: 640px;
+		background-color: #1a202c;
+		/* width: 765px;
+		height: 480px; */
 		align-items: center;
 		border-radius: 15px;
 	}
 
 	.reel {
-		width: 200px;
-		height: 604px;
+		width: 150px;
+		height: 453px;
 		border: 2px solid #333;
 		margin: 0 5px;
 		background-color: #000;
@@ -356,7 +401,7 @@
 
 	:global(.symbol) {
 		width: 100%;
-		height: 200px;
+		height: 150px;
 		/* margin-bottom: 5px; */
 		/* box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); */
 	}

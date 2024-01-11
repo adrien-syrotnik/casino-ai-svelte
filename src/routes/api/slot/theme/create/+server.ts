@@ -7,11 +7,18 @@ export async function POST({ request }) {
 	const body = await request.json();
 	if (!body.themePrompt) return json({ done: false, error: "themePrompt is required" });
 
+	const useOpenAPI = body.useOpenAPI;
+	const openAPIKey = body.openAPIKey;
+	const precision = body.precision ?? 20;
+	const themePrompt = body.themePrompt;
+	const useDalle3 = body.useDalle3 ?? true;
+	const useBetterPrompt = body.useBetterPrompt ?? false;
+
+
 	try {
-		if (body.useOpenAPI) {
+		if (useOpenAPI) {
 			if (!body.openAPIKey) return json({ done: false, error: "openAPIKey is required" });
-			const useDalle3 = true;
-			GenerateAllImagesOpenAI(body.themePrompt, body.openAPIKey, useDalle3, body.precision).catch(e => {
+			GenerateAllImagesOpenAI(themePrompt, openAPIKey, useDalle3, useBetterPrompt, precision).catch(e => {
 				console.error(e);
 				resetImageGeneration();
 			});
@@ -19,7 +26,7 @@ export async function POST({ request }) {
 		}
 
 
-		if (body.precision) GenerateAllImagesLocal(body.themePrompt, body.precision);
+		if (precision) GenerateAllImagesLocal(themePrompt, useBetterPrompt, openAPIKey, precision);
 		else GenerateAllImagesLocal(body.themePrompt);
 		return json({ done: true });
 	}

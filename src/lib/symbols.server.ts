@@ -74,7 +74,7 @@ const weights_symbols: { [key: string]: number } = {
     'm2': 75,
     'm3': 70,
     'm4': 60,
-    'wild': 40,
+    'wild': 50,
 }
 
 
@@ -94,10 +94,10 @@ export function getRandSymbol(symbols: SlotSymbol[] = DEFAULT_SYMBOLS): SlotSymb
 
 
     //Get random number between 0 and total
-    let rand = Math.floor(Math.random() * total);
+    const rand = Math.floor(Math.random() * total);
 
-    //Get a random chance to be next the same symbol (30%)
-    if (Math.random() < 0.3) {
+    //Get a random chance to be next the same symbol (35%)
+    if (Math.random() < 0.35) {
         return oldSymbolRand;
     }
 
@@ -274,7 +274,7 @@ function validatePayoutRatio() {
     console.log(`Best Payout: ${bestPayout}`);
 }
 
-function getRandMatrixSymbol(): string[][] {
+export function getRandMatrixSymbol(): string[][] {
     const matrix = [];
     for (let i = 0; i < 5; i++) {
         // matrix.push([drawRandomSymbol().name, drawRandomSymbol().name, drawRandomSymbol().name]);
