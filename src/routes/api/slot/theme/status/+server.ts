@@ -3,7 +3,7 @@ import { AllImageToGenerate } from "$lib/states-image-generation";
 import { json } from "@sveltejs/kit";
 
 /** @type {import('./$types').RequestHandler} */
-export async function GET({ request }) {
+export async function GET() {
 	// const body = await request.json();
 	// if(!body.theme) return json({ done : false, error : "theme is required" });
 

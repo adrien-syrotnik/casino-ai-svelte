@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import SlotMachine from './slot-machine.svelte';
-	import { AppBar } from '@skeletonlabs/skeleton';
 
 	/** @type {import('./$types').PageData} */
 	export let data: any;
@@ -31,4 +30,6 @@
 	<img src="/logo2-bg.jpg" alt="logo" style="width: 150px; border-radius: 50%;" />
 </AppBar> -->
 
+
 <SlotMachine bind:data></SlotMachine>
+

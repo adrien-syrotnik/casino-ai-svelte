@@ -254,17 +254,18 @@ function validatePayoutRatio() {
     let totalPayout = 0;
 
     for (let i = 0; i < trials; i++) {
-        const symbolMatrix = getRandMatrixSymbol();
+        const symbolAllMatrix = getRandMatrixSymbol();
+        const symbolMatrix = symbolAllMatrix.stringMatrix;
         const result = checkLines25(symbolMatrix[0], symbolMatrix[1], symbolMatrix[2], symbolMatrix[3], symbolMatrix[4]);
         const reward = result.reward;
         totalPayout += reward;
 
-        if(reward > bestPayout) {
+        if (reward > bestPayout) {
             bestPayout = reward;
             console.log(`New best payout: ${bestPayout}`);
         }
 
-        if(i % (trials / 100) === 0) {
+        if (i % (trials / 100) === 0) {
             console.log(`Progress: ${i / trials * 100}%`);
         }
     }
@@ -274,13 +275,48 @@ function validatePayoutRatio() {
     console.log(`Best Payout: ${bestPayout}`);
 }
 
-export function getRandMatrixSymbol(): string[][] {
+export function getRandMatrixSymbol(rows: number = 5) {
     const matrix = [];
+    //5 columns
     for (let i = 0; i < 5; i++) {
-        // matrix.push([drawRandomSymbol().name, drawRandomSymbol().name, drawRandomSymbol().name]);
-        matrix.push([getRandSymbol().name, getRandSymbol().name, getRandSymbol().name]);
+        const column = [];
+        //5 rows
+        for (let j = 0; j < rows; j++) {
+            column.push(getRandSymbol().name);
+        }
+        matrix.push(column);
     }
-    return matrix;
+
+    //Bonus
+    let bonus = false;
+
+    const wildPosition: { x: number, y: number }[] = [];
+
+    //BONUS: 1% chance to get 5 wilds
+    if (Math.random() < 0.05 && rows > 5) {
+
+        bonus = true;
+        //Place 5 wild randomly
+        for (let i = 0; i < 5; i++) {
+            let x = Math.floor(Math.random() * 5);
+            let y = Math.floor(Math.random() * 3 + 1);
+
+            while (wildPosition.some((pos) => pos.x === x && pos.y === y)) {
+                x = Math.floor(Math.random() * 5);
+                y = Math.floor(Math.random() * 3 + 1);
+            }
+
+            //replace symbol by wild
+            matrix[x][y] = 'wild';
+            wildPosition.push({ x, y });
+        }
+    }
+
+    return {
+        stringMatrix: matrix,
+        bonus,
+        wildPosition
+    }
 }
 
 // validatePayoutRatio();   

@@ -4,6 +4,7 @@
 	import { cubicInOut, cubicOut, quintOut } from 'svelte/easing';
 	import { tweened, type Unsubscriber } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
+	import CoinsAnimation from './coins-animation.svelte';
 
 	let audioBIGWIN: HTMLAudioElement;
 	let audioMEGAWIN: HTMLAudioElement;
@@ -18,6 +19,7 @@
 	onMount(() => {
 		unsubscribeTriggerWin = triggerWin.subscribe(async (win) => {
 			if (win.win > 0) {
+				numberCoin = 0;
 				rewardTime.set(0, { duration: 0 });
 				sizeTime.set(100, { duration: 0 });
 				bet = win.bet;
@@ -33,7 +35,8 @@
 				font_color: '#FFD700',
 				size_start: 100,
 				size_end: 120,
-				song: audioBIGWIN
+				song: audioBIGWIN,
+				numberOfCoin: 15
 			},
 			{
 				name: 'MEGA WIN!',
@@ -42,7 +45,12 @@
 				font_color: ' #FFA500',
 				size_start: 110,
 				size_end: 130,
-				song: audioMEGAWIN
+				song: audioMEGAWIN,
+				numberOfCoin: 25,
+				coinConfig: {
+					yDirRange : [-100, -130],
+					xRange : [-30, 30],
+				}
 			},
 			{
 				name: 'HUGE WIN!',
@@ -51,7 +59,12 @@
 				font_color: '#FF0000',
 				size_start: 120,
 				size_end: 140,
-				song: audioHUGEWIN
+				song: audioHUGEWIN,
+				numberOfCoin: 35,
+				coinConfig: {
+					yDirRange : [-110, -140],
+					xRange : [-40, 40],
+				}
 			},
 			{
 				name: 'ULTRA WIN!',
@@ -60,7 +73,12 @@
 				font_color: '(#800080',
 				size_start: 130,
 				size_end: 150,
-				song: audioULTRAWIN
+				song: audioULTRAWIN,
+				numberOfCoin: 50,
+				coinConfig: {
+					yDirRange : [-120, -150],
+					xRange : [-50, 50],
+				}
 			},
 			{
 				name: 'JACKPOT!',
@@ -70,7 +88,13 @@
 				size_start: 140,
 				size_end: 160,
 				song: audioJACKPOT,
-				volume: 1
+				volume: 1,
+				numberOfCoin: 75,
+				coinConfig: {
+					yDirRange : [-130, -160],
+					xRange : [-60, 60],
+					xDirRange : [-50, 50],
+				}
 			},
 			{
 				name: 'MONSTER WIN!',
@@ -81,7 +105,12 @@
 				size_end: 170,
 				song: audioMONSTERWIN,
 				volume: 1,
-				playbackRate: 1.5
+				playbackRate: 1.5,
+				numberOfCoin: 90,
+				coinConfig: {
+					yDirRange : [-140, -170],
+					xDirRange : [-70, 70],
+				}
 			},
 			{
 				name: 'IMPOSSIBLE!!!',
@@ -92,7 +121,13 @@
 				size_end: 180,
 				song: audioIMPOSSIBLE,
 				volume: 1,
-				playbackRate: 2
+				playbackRate: 2,
+				numberOfCoin: 120,
+				coinConfig: {
+					yDirRange : [-120, -180],
+					xDirRange : [-50, 50],
+					xRange : [-window.innerWidth/2, window.innerWidth/2],
+				}
 			}
 		];
 	});
@@ -119,7 +154,7 @@
 
 	let bet = 2;
 
-	let stepAvailabe: {
+	type stepAvailabeType = {
 		name: string;
 		start: number;
 		image: string;
@@ -129,7 +164,19 @@
 		song: HTMLAudioElement;
 		volume?: number;
 		playbackRate?: number;
-	}[];
+		numberOfCoin: number;
+		coinConfig?: {
+			xRange?: [number, number],
+			yRange?: [number, number],
+			xDirRange?: [number, number],
+			yDirRange?: [number, number],
+			spinSpeedRange?: [number, number],
+			sizeSpeedRange?: [number, number],
+			gravityRange?: [number, number]
+		};
+	};
+
+	let stepAvailabe: stepAvailabeType[];
 
 	async function StartAnimation(win: number) {
 		//Use the first element of the array, then play animation until next reward step, if not reach, then play until win is reach
@@ -171,6 +218,7 @@
 
 		let timeout2 = setTimeout(() => {
 			show = false;
+			numberCoin = 0;
 			//Stop sound
 			stepAvailabe.forEach((s) => {
 				s.song.pause();
@@ -185,6 +233,7 @@
 			sizeTime.set(step.size_end + 30, { duration: 0 });
 			setTimeout(() => {
 				show = false;
+				numberCoin = 0;
 				//Stop sound
 				stepAvailabe.forEach((s) => {
 					s.song.pause();
@@ -197,18 +246,10 @@
 
 	let show = false;
 
+	let configCoin: any = {};
+
 	async function PlayAnimation(
-		step: {
-			name: string;
-			start: number;
-			image: string;
-			font_color: string;
-			size_start: number;
-			size_end: number;
-			song: HTMLAudioElement;
-			volume?: number;
-			playbackRate?: number;
-		},
+		step: stepAvailabeType,
 		pourcentage: number = 1,
 		finalPrice: number
 	) {
@@ -216,6 +257,9 @@
 			color = step.font_color;
 			winText = step.name;
 			rewardTime.set(finalPrice);
+
+			numberCoin = step.numberOfCoin;
+			configCoin = step.coinConfig;
 
 			sizeTextTransition.set(40, { duration: 0, easing: cubicInOut });
 			sizeTextTransition.set(50, { duration: 200, easing: cubicInOut });
@@ -256,9 +300,10 @@
 	let nextSpinFunction: any;
 
 	onDestroy(() => {
-		if(unsubscribeTriggerWin)
-			unsubscribeTriggerWin();
+		if (unsubscribeTriggerWin) unsubscribeTriggerWin();
 	});
+
+	let numberCoin = 0;
 </script>
 
 <audio src="musics/1.wav" bind:this={audioBIGWIN}></audio>
@@ -272,6 +317,14 @@
 {#if show}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div
+		id="modal-background"
+		class="flex flex-col justify-center items-center"
+		transition:scale={{ duration: 500, easing: quintOut }}
+		on:click={() => nextSpinFunction?.()}
+	></div>
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		id="modal-reward"
 		class="flex flex-col justify-center items-center"
@@ -292,6 +345,11 @@
 		</div>
 	</div>
 {/if}
+
+<!-- for each number of coin, generate the component -->
+{#each Array(numberCoin) as _, i}
+	<CoinsAnimation bind:configCoin></CoinsAnimation>
+{/each}
 
 <style>
 	@font-face {
@@ -322,8 +380,6 @@
 	#modal-reward {
 		width: 100%;
 		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		z-index: 100;
 
 		position: fixed;
 		top: 50%;
@@ -331,10 +387,29 @@
 		/* bring your own prefixes */
 		transform: translate(-50%, -50%);
 
-        overflow: visible;
+		overflow: visible;
+		z-index: 101;
 	}
 
+	#modal-background {
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		/* bring your own prefixes */
+		transform: translate(-50%, -50%);
+
+		overflow: visible;
+		z-index: 98;
+	}
+	
 	.number-win {
 		font-family: 'SuperstarM54-Zq6K';
+		z-index: 101;
+		/* Add border to text 5px */
+		text-shadow: -5px 0 black, 0 5px black, 5px 0 black, 0 -5px black;
 	}
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SlotReel from './slot-reel.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import PlayerBar from './player-bar.svelte';
 	import ImageGeneratorBar from './image-generator-bar.svelte';
 	import type { SlotConfig, SlotSymbol } from '$lib/symbols.types';
@@ -8,11 +8,37 @@
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { triggerClose, triggerWin } from '$lib/win-modal-store';
 	import { tweened } from 'svelte/motion';
-	import { cubicInOut } from 'svelte/easing';
+	import { cubicInOut, elasticInOut } from 'svelte/easing';
+	import AnimationBonus from './animation-bonus.svelte';
 
-	onMount(() => {
+	onMount(async () => {
 		if (localStorage.getItem('balance')) balance = Number(localStorage.getItem('balance')!);
+
+		//Check if balnce is NaN, if so, set it to 500
+		if (isNaN(balance)) {
+			balance = 500;
+			localStorage.setItem('balance', balance.toString());
+		}
+
 		localStorageLoaded = true;
+
+		const responseSpinMatrix = await fetch('/api/slot/random-symbol', {
+			method: 'POST',
+			body: JSON.stringify({ rows: 5 }),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		const json = await responseSpinMatrix.json();
+		const spinMatrix = json.matrix as SlotSymbol[][]; //5 rows, 5 columns
+
+		const symbolsReel = [spinMatrix[0], spinMatrix[1], spinMatrix[2], spinMatrix[3], spinMatrix[4]];
+
+		//Init all reels
+		Slotreel.forEach((reel: SlotReel, i) => {
+			reel.InitSymbols(symbolsReel[i]);
+		});
 	});
 
 	const modalStore = getModalStore();
@@ -32,7 +58,7 @@
 		}
 	};
 
-	let Slotreel = [null, null, null, null, null] as any;
+	let Slotreel = [null, null, null, null, null] as any[];
 
 	function AnimateWinLine(line: {
 		reelAndRow: number[][];
@@ -70,18 +96,18 @@
 			});
 		});
 
+		await tick();
 		await new Promise((resolve) => setTimeout(resolve, 20));
 
 		currentWinLineSymbol = '';
 		currentWinLineReward = 0;
 		currentWinLineNumberOfSymbols = 0;
-		
 	}
 
 	let localStorageLoaded = false;
 
-	function SpinReels(reel: number) {
-		Slotreel[reel].spinAllSymbols();
+	function SpinReels(reel: number, symbols: SlotSymbol[]) {
+		Slotreel[reel].spinAllSymbols(symbols);
 	}
 
 	let reward = 0;
@@ -93,7 +119,7 @@
 
 	let autoSpinLeft = 0;
 	let autoSpinTimeout: any = null;
-	function StartAutoSpin(numberOfTime: number) {
+	async function StartAutoSpin(numberOfTime: number) {
 		if (numberOfTime <= 0) {
 			StopAutoSpin();
 			return;
@@ -101,7 +127,7 @@
 
 		//start auto spin
 		autoSpinLeft = numberOfTime;
-		SpinAllDelay();
+		await SpinAllDelay();
 
 		//start auto spin timeout
 		autoSpinTimeout = setTimeout(() => {
@@ -120,10 +146,51 @@
 		autoSpinLeft = 0;
 	}
 
-	function SpinAllDelay(delayBetween: number = 100) {
+	async function SpinAllDelay(delayBetween: number = 100) {
 		if (balance < bet) {
 			alert('Not enough money');
 			return;
+		}
+
+		spinEnabled = false;
+
+		const responseSpinMatrix = await fetch('/api/slot/random-symbol', {
+			method: 'POST',
+			body: JSON.stringify({ rows: 25 }),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		const json = await responseSpinMatrix.json();
+		const spinMatrix = json.matrix as SlotSymbol[][]; //5 rows, 5 columns
+
+		const symbolsReel1 = spinMatrix[0];
+		const symbolsReel2 = spinMatrix[1];
+		const symbolsReel3 = spinMatrix[2];
+		const symbolsReel4 = spinMatrix[3];
+		const symbolsReel5 = spinMatrix[4];
+
+		//If bonus is true, then play bonus animation
+		if (json.bonus) {
+			bonusEarthQuake.currentTime = 0;
+			await bonusEarthQuake.play();
+			//Make the slot tremble
+			for (let i = 0; i < 10; i++) {
+				await zoomWin.set(1.01, { duration: 30, easing: cubicInOut });
+				await zoomWin.set(1, { duration: 30, easing: cubicInOut });
+			}
+
+			volumeEarthQuake.set(0, { duration: 400, easing: cubicInOut }).then(() => {
+				bonusEarthQuake.pause();
+				bonusEarthQuake.currentTime = 0;
+				volumeEarthQuake.set(1, { duration: 0 });
+			});
+
+			//Wait 0.5s
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			//Play bonus animation
+			await animationBonusNode.StartAnimation();
 		}
 
 		//Play sound
@@ -139,21 +206,19 @@
 		currentBet = bet;
 		balance -= bet;
 
-		SpinReels(0);
+		SpinReels(0, symbolsReel1);
 		setTimeout(() => {
-			SpinReels(1);
+			SpinReels(1, symbolsReel2);
 		}, delayBetween);
 		setTimeout(() => {
-			SpinReels(2);
+			SpinReels(2, symbolsReel3);
 		}, delayBetween * 2);
 		setTimeout(() => {
-			SpinReels(3);
+			SpinReels(3, symbolsReel4);
 		}, delayBetween * 3);
 		setTimeout(() => {
-			SpinReels(4);
+			SpinReels(4, symbolsReel5);
 		}, delayBetween * 4);
-
-		spinEnabled = false;
 
 		setTimeout(async () => {
 			const symbolReel = {
@@ -204,7 +269,6 @@
 				audioSmallWin.currentTime = 0;
 				audioSmallWin.play();
 			}
-			
 
 			reward = result.reward * bet;
 			balance += reward;
@@ -232,7 +296,7 @@
 			}
 
 			spinEnabled = true;
-		}, 1200);
+		}, 1000);
 	}
 
 	let winLinesAnimationTab: {
@@ -273,10 +337,15 @@
 	let audioRise: HTMLAudioElement;
 	let audioSpin: HTMLAudioElement;
 	let audioSmallWin: HTMLAudioElement;
+	let bonusEarthQuake: HTMLAudioElement;
+
+	let volumeEarthQuake = tweened(1, { duration: 1000, easing: cubicInOut });
 
 	let zoomWin = tweened(1, { duration: 1000, easing: cubicInOut });
 	let slot_width = 765;
 	let slot_height = 480;
+
+	let animationBonusNode: AnimationBonus;
 
 	async function WaitForWinClose() {
 		triggerClose.set(0);
@@ -295,9 +364,20 @@
 	}
 </script>
 
-<audio bind:this={audioSpin} id="spinSound" src="/musics/click.ogg" volume="1" preload="auto"></audio>
+<AnimationBonus bind:this={animationBonusNode}></AnimationBonus>
+
+<audio bind:this={audioSpin} id="spinSound" src="/musics/click.ogg" volume="1" preload="auto"
+></audio>
 <audio bind:this={audioRise} id="riseSound" src="/musics/rise.ogg" preload="auto"></audio>
-<audio bind:this={audioSmallWin} id="smallWinSound" src="/musics/small_win.mp3" preload="auto"></audio>
+<audio bind:this={audioSmallWin} id="smallWinSound" src="/musics/small_win.mp3" preload="auto"
+></audio>
+<audio
+	bind:this={bonusEarthQuake}
+	id="bonusEarthQuakeSound"
+	src="/musics/earthquake.wav"
+	bind:volume={volumeEarthQuake}
+	preload="auto"
+></audio>
 
 <div class="container justify-center mx-auto flex flex-col text-center">
 	{#if localStorageLoaded}

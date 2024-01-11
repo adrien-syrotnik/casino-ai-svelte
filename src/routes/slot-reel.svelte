@@ -2,11 +2,10 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-
-	//Import tweening library
-
 	import Symbol from './symbol.svelte';
 	import type { SlotSymbol } from '$lib/symbols.types';
+
+
 	let SymbolsNodes: {
 		initY: number;
 		spinY: number;
@@ -16,17 +15,16 @@
 	}[] = [];
 
 	onMount(async () => {
-		// Init 3 symbols
+	});
+
+	export let currentSymbols = ['', '', ''];
+	export let currentSymbolsNode = [null, null, null];
+
+	//Only 5 symbols please
+	export function InitSymbols(symbols: SlotSymbol[]) {
+
 		for (let i = 0; i < 5; i++) {
-			const response = await fetch('/api/slot/random-symbol', {
-				method: 'POST',
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-
-			const symbol = (await response.json()) as SlotSymbol;
-
+			const symbol = symbols[i];
 			SymbolsNodes.push({
 				initY: 150,
 				spinY: 2000,
@@ -36,17 +34,9 @@
 
 		//Refresh symbols
 		SymbolsNodes = [...SymbolsNodes];
+	}
 
-		//Console log the last symbol after 5 seconds
-		// setTimeout(() => {
-		// 	console.log(SymbolsNodes[29].symbol.name);
-		// }, 5000);
-	});
-
-	export let currentSymbols = ['', '', ''];
-	export let currentSymbolsNode = [null, null, null];
-
-	export function spinAllSymbols() {
+	export function spinAllSymbols(symbols: SlotSymbol[]) {
 		//If more than 25 symbols, keep only the first 5
 		let last5Symbols = SymbolsNodes.slice(-5);
 		// console.log(last5Symbols.map((s) => s.symbol.name));
@@ -68,14 +58,7 @@
 						symbol: last5Symbols[i - 20].symbol
 					});
 				} else {
-					const response = await fetch('/api/slot/random-symbol', {
-						method: 'POST',
-						headers: {
-							'content-type': 'application/json'
-						}
-					});
-
-					const symbol = (await response.json()) as SlotSymbol;
+					const symbol = symbols[i];
 					SymbolsNodesTemp.push({
 						initY: 2150,
 						spinY: 2000,
