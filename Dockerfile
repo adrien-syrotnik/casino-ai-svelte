@@ -30,10 +30,10 @@ RUN npm install && npm run build
 # COPY --chown=svelteuser:svelteuser --from=build /app/build /app/package.json ./
 
 # expose 8080 on container
-EXPOSE 8080
+EXPOSE 80
 
 # set app host and port and env as production
-ENV HOST=0.0.0.0 PORT=8080 NODE_ENV=production ORIGIN=http://localhost:3000
+ENV HOST=0.0.0.0 PORT=80 NODE_ENV=production ORIGIN=https://slot.adrien-syrotnik.fr
 
 # start the app with dumb init to spawn the Node.js runtime process
 # with signal support
