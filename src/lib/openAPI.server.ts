@@ -133,7 +133,7 @@ export async function GenerateAllImagesLocal(theme: string, useBetterPrompt:bool
 
         const prompt = useBetterPrompt ? prompts[state.symbol] : state.prompt(theme);
 
-        await GenerateImageLocal(prompts[state.symbol], `static/slot-configs/${theme}/${state.symbol}.png`, precision);
+        await GenerateImageLocal(prompt, `static/slot-configs/${theme}/${state.symbol}.png`, precision);
         currentImageGenerationStep++;
     }
 

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  
+  slot:
+    build:
+      dockerfile: Dockerfile
+      # context: ./front
+      args:
+        - no-cache
+    pull_policy: build
+    volumes:
+      - ./static/slot-configs:/slot-configs
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.syrotnik-slot.entrypoints=websecure,web"
+      - "traefik.http.routers.syrotnik-slot.rule=Host(`slot.adrien-syrotnik.fr`)"
+      - "traefik.http.services.syrotnik-slot.loadbalancer.server.port=80"
+      # - "traefik.http.routers.home.tls=true"
+      - "traefik.http.routers.syrotnik-slot.tls.certresolver=adriens"
+      - "traefik.http.routers.syrotnik-slot.service=syrotnik-slot"
+    restart: always
