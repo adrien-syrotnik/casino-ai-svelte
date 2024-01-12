@@ -14,8 +14,11 @@
 		easing: cubicOut
 	});
 
-	export async function StartAnimation() {
+	let numberWilds = 0;
+
+	export async function StartAnimation(numberOfWilds: number) {
 		show = true;
+		numberWilds = numberOfWilds;
 
 		bonusSound.currentTime = 0;
 		await bonusSound.play();
@@ -51,7 +54,7 @@
 			BONUS
 		</div>
 		<div style="font-size: {$sizeTime - 70}px; opacity: 1; font-family: 'StardosStencilBold-9mzn';">
-			Wild x5
+			Wild x{numberWilds}
 		</div>
 	</div>
 {/if}
@@ -59,7 +62,7 @@
 <style>
 	@font-face {
 		font-family: 'StardosStencilBold-9mzn';
-		src: url('fonts/new/StardosStencilBold-9mzn.ttf');
+		src: url('/fonts/new/StardosStencilBold-9mzn.ttf');
 	}
 
 	.modal-reward {

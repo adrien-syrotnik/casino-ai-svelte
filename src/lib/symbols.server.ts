@@ -296,8 +296,10 @@ export function getRandMatrixSymbol(rows: number = 5) {
     if (Math.random() < 0.05 && rows > 5) {
 
         bonus = true;
-        //Place 5 wild randomly
-        for (let i = 0; i < 5; i++) {
+
+        //Place 3 to 9 wilds
+        const numberOfWilds = Math.floor(Math.random() * 7 + 3);
+        for (let i = 0; i < numberOfWilds; i++) {
             let x = Math.floor(Math.random() * 5);
             let y = Math.floor(Math.random() * 3 + 1);
 

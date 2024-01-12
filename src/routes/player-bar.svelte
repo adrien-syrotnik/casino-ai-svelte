@@ -38,6 +38,15 @@
 		target: 'popupClick',
 		placement: 'top'
 	};
+
+	function onBetChange(e:any) {
+		bet = e.target.value;
+		if(bet <= 0) {
+			bet = 1;
+		} else if(bet > balance) {
+			bet = balance;
+		}
+	}
 </script>
 
 <div id="player-bar">
@@ -51,9 +60,7 @@
 	>
 	<!-- value -->
 	<div class="mx-2 text-2xl">
-		<span contenteditable="true"  bind:textContent={bet}>
-			{bet}
-		</span>
+		<input type="number" class="input" value={bet} min="1" max={balance} on:change={onBetChange} />
 		<br />
 		<small> BET </small>
 	</div>

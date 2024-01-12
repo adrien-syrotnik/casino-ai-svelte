@@ -354,27 +354,27 @@
 <style>
 	@font-face {
 		font-family: 'CoffeetinInitials';
-		src: url('fonts/CoffeetinInitials-YXJ2.ttf');
+		src: url('/fonts/CoffeetinInitials-YXJ2.ttf');
 	}
 
 	@font-face {
 		font-family: 'CasinoFlatShadow-Italic';
-		src: url('fonts/CasinoFlatShadow-Italic.ttf');
+		src: url('/fonts/CasinoFlatShadow-Italic.ttf');
 	}
 
 	@font-face {
 		font-family: 'Casino3D-Italic';
-		src: url('fonts/Casino3D-Italic.ttf');
+		src: url('/fonts/Casino3D-Italic.ttf');
 	}
 
 	@font-face {
 		font-family: 'SuperstarM54-Zq6K';
-		src: url('fonts/SuperstarM54-Zq6K.ttf');
+		src: url('/fonts/SuperstarM54-Zq6K.ttf');
 	}
 
 	@font-face {
 		font-family: 'Graduate-9WoB';
-		src: url('fonts/new/Graduate-9WoB.ttf');
+		src: url('/fonts/new/Graduate-9WoB.ttf');
 	}
 
 	#modal-reward {

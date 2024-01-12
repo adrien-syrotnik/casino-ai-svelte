@@ -126,18 +126,17 @@
 		}
 
 		//start auto spin
-		autoSpinLeft = numberOfTime;
+		autoSpinLeft = numberOfTime - 1;
 		await SpinAllDelay();
 
-		//start auto spin timeout
-		autoSpinTimeout = setTimeout(() => {
-			if (autoSpinLeft > 0) {
-				StartAutoSpin(autoSpinLeft);
-			}
-		}, 2000);
+		//Wait 1s
+		await new Promise((resolve) => setTimeout(resolve, 600));
 
-		//decrement auto spin left
-		autoSpinLeft--;
+		if (autoSpinLeft > 0) {
+			StartAutoSpin(autoSpinLeft);
+		}
+
+		
 	}
 
 	function StopAutoSpin() {
@@ -149,6 +148,11 @@
 	async function SpinAllDelay(delayBetween: number = 100) {
 		if (balance < bet) {
 			alert('Not enough money');
+			return;
+		}
+
+		if (bet <= 0) {
+			alert('Bet must be greater than 0');
 			return;
 		}
 
@@ -190,7 +194,7 @@
 			//Wait 0.5s
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			//Play bonus animation
-			await animationBonusNode.StartAnimation();
+			await animationBonusNode.StartAnimation(json.wildPosition.length);
 		}
 
 		//Play sound
@@ -220,83 +224,84 @@
 			SpinReels(4, symbolsReel5);
 		}, delayBetween * 4);
 
-		setTimeout(async () => {
-			const symbolReel = {
-				reel1: Slotreel[0].currentSymbols,
-				reel2: Slotreel[1].currentSymbols,
-				reel3: Slotreel[2].currentSymbols,
-				reel4: Slotreel[3].currentSymbols,
-				reel5: Slotreel[4].currentSymbols
-			};
+		//Wait 1 second
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const response = await fetch('/api/slot/spin', {
-				method: 'POST',
-				body: JSON.stringify(symbolReel),
-				headers: {
-					'content-type': 'application/json'
-				}
+		const symbolReel = {
+			reel1: Slotreel[0].currentSymbols,
+			reel2: Slotreel[1].currentSymbols,
+			reel3: Slotreel[2].currentSymbols,
+			reel4: Slotreel[3].currentSymbols,
+			reel5: Slotreel[4].currentSymbols
+		};
+
+		const response = await fetch('/api/slot/spin', {
+			method: 'POST',
+			body: JSON.stringify(symbolReel),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		let result: {
+			lines: {
+				reelAndRow: number[][];
+				reward: number;
+				symbol: string;
+				numberOfSymbol: number;
+			}[];
+			reward: number;
+		} = await response.json();
+
+		if (result.reward > 10) {
+			//Wait 2 seconds for playing rising sound
+			audioRise.currentTime = 0.5;
+			await audioRise.play();
+			//zoom in
+			zoomWin.set(1.1, { duration: 500, easing: cubicInOut });
+			await new Promise((resolve) => setTimeout(resolve, 500));
+
+			zoomWin.set(0.95, { duration: 500, easing: cubicInOut });
+			await new Promise((resolve) => setTimeout(resolve, 500));
+
+			//zoom out
+			zoomWin.set(1, { duration: 200, easing: cubicInOut });
+			audioRise.pause();
+			audioRise.currentTime = 0;
+
+			triggerWin.set({ win: result.reward, bet });
+			await WaitForWinClose();
+		} else if (result.reward > 0) {
+			audioSmallWin.currentTime = 0;
+			audioSmallWin.play();
+		}
+
+		reward = result.reward * bet;
+		balance += reward;
+
+		localStorage.setItem('balance', balance.toString());
+
+		//Check that balance is decimal fixed to 2
+		balance = Math.round(balance * 100) / 100;
+
+		winLinesAnimationTab = result.lines;
+
+		if (result.lines.length > 0) {
+			result.lines.forEach((line) => {
+				AnimateWinLine(line);
 			});
 
-			let result: {
-				lines: {
-					reelAndRow: number[][];
-					reward: number;
-					symbol: string;
-					numberOfSymbol: number;
-				}[];
-				reward: number;
-			} = await response.json();
+			currentWinLineReward = reward;
+			currentWinLineNumberOfSymbols = 0;
+			currentWinLineSymbol = '';
 
-			if (result.reward > 8) {
-				//Wait 2 seconds for playing rising sound
-				audioRise.currentTime = 0.5;
-				await audioRise.play();
-				//zoom in
-				zoomWin.set(1.1, { duration: 500, easing: cubicInOut });
-				await new Promise((resolve) => setTimeout(resolve, 500));
+			winLinesAnimationTimeout = setTimeout(async () => {
+				await StopAnimateWinLine();
+				AnimateLineIndividually();
+			}, 2500);
+		}
 
-				zoomWin.set(0.95, { duration: 500, easing: cubicInOut });
-				await new Promise((resolve) => setTimeout(resolve, 500));
-
-				//zoom out
-				zoomWin.set(1, { duration: 200, easing: cubicInOut });
-				audioRise.pause();
-				audioRise.currentTime = 0;
-
-				triggerWin.set({ win: result.reward, bet });
-				await WaitForWinClose();
-			} else if (result.reward > 0) {
-				audioSmallWin.currentTime = 0;
-				audioSmallWin.play();
-			}
-
-			reward = result.reward * bet;
-			balance += reward;
-
-			localStorage.setItem('balance', balance.toString());
-
-			//Check that balance is decimal fixed to 2
-			balance = Math.round(balance * 100) / 100;
-
-			winLinesAnimationTab = result.lines;
-
-			if (result.lines.length > 0) {
-				result.lines.forEach((line) => {
-					AnimateWinLine(line);
-				});
-
-				currentWinLineReward = reward;
-				currentWinLineNumberOfSymbols = 0;
-				currentWinLineSymbol = '';
-
-				winLinesAnimationTimeout = setTimeout(async () => {
-					await StopAnimateWinLine();
-					AnimateLineIndividually();
-				}, 2500);
-			}
-
-			spinEnabled = true;
-		}, 1000);
+		spinEnabled = true;
 	}
 
 	let winLinesAnimationTab: {

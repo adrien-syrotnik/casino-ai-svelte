@@ -8,6 +8,8 @@ args = sys.argv[1:]
 
 prompt = args[0]
 
+print(args)
+
 name_image = 'image.png'
 
 if(len(args) > 1):
@@ -17,7 +19,10 @@ num_inference_steps = 5
 if(len(args) > 2):
     num_inference_steps = int(args[2])
 
+print("num_inference_steps: ", num_inference_steps)
 
+height=512
+width=512
 
 
 # print(prompt)
@@ -37,13 +42,30 @@ pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1
 #     "https://huggingface.co/openskyml/dalle-3-xl/blob/main/Dall-e_3_0.3-v2.safetensors"
 # ).to('cuda')
 
+
+#Disable safety checker
+def dummy(images, **kwargs):
+    return images, False
+pipeline.safety_checker = dummy
+
 def progress(step, timestep, latents):
     print("step: ", step)
     sys.stdout.flush()
 
-     
-# image = pipeline('"J" symbol sprite for an online slot machine, black background, 256x256px, a dark theme of batman').images[0]   
-image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps).images[0]
+
+# https://huggingface.co/docs/diffusers/using-diffusers/conditional_image_generation
+
+image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps, num_images_per_prompt=1, height=height, width=width).images[0]
+
+# nb_images = 4
+
+# images = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps, num_images_per_prompt=nb_images).images
+
+# for i in range(nb_images):
+#     image = images[i]
+#     image.save(name_image + str(i) + '.png')
+
+
 
 
 image.save(name_image)
