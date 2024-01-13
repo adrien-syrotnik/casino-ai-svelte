@@ -411,5 +411,7 @@
 		z-index: 101;
 		/* Add border to text 5px */
 		text-shadow: -5px 0 black, 0 5px black, 5px 0 black, 0 -5px black;
+
+		text-wrap: nowrap;
 	}
 </style>

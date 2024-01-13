@@ -384,7 +384,7 @@
 	preload="auto"
 ></audio>
 
-<div class="container justify-center mx-auto flex flex-col text-center">
+<div class="container justify-center mx-auto flex flex-col text-center" style="width: 1000px;">
 	{#if localStorageLoaded}
 		<form method="post" use:enhance>
 			<label class="label">
