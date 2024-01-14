@@ -20,11 +20,8 @@ services:
       - "traefik.http.routers.syrotnik-slot.tls.certresolver=adriens"
       - "traefik.http.routers.syrotnik-slot.service=syrotnik-slot"
     restart: always
-    networks:
-      - traefik
-      - default
 
 networks:
-  traefik:
-    external:
-      name: traefik_proxy
+  default:
+    name: traefik
+    external: true
