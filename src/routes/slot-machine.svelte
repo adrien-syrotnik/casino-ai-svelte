@@ -158,7 +158,7 @@
 
 		spinEnabled = false;
 
-		const responseSpinMatrix = await fetch('/api/slot/random-symbol', {
+		const responseSpin = await fetch('/api/slot/spin', {
 			method: 'POST',
 			body: JSON.stringify({ rows: 25 }),
 			headers: {
@@ -166,8 +166,8 @@
 			}
 		});
 
-		const json = await responseSpinMatrix.json();
-		const spinMatrix = json.matrix as SlotSymbol[][]; //5 rows, 5 columns
+		const responseSpinObject = await responseSpin.json();
+		const spinMatrix = responseSpinObject.matrix as SlotSymbol[][]; //5 rows, 5 columns
 
 		const symbolsReel1 = spinMatrix[0];
 		const symbolsReel2 = spinMatrix[1];
@@ -176,7 +176,7 @@
 		const symbolsReel5 = spinMatrix[4];
 
 		//If bonus is true, then play bonus animation
-		if (json.bonus) {
+		if (responseSpinObject.bonus) {
 			bonusEarthQuake.currentTime = 0;
 			await bonusEarthQuake.play();
 			//Make the slot tremble
@@ -194,7 +194,7 @@
 			//Wait 0.5s
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			//Play bonus animation
-			await animationBonusNode.StartAnimation(json.wildPosition.length);
+			await animationBonusNode.StartAnimation(responseSpinObject.wildPosition.length);
 		}
 
 		//Play sound
@@ -227,22 +227,6 @@
 		//Wait 1 second
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		const symbolReel = {
-			reel1: Slotreel[0].currentSymbols,
-			reel2: Slotreel[1].currentSymbols,
-			reel3: Slotreel[2].currentSymbols,
-			reel4: Slotreel[3].currentSymbols,
-			reel5: Slotreel[4].currentSymbols
-		};
-
-		const response = await fetch('/api/slot/spin', {
-			method: 'POST',
-			body: JSON.stringify(symbolReel),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-
 		let result: {
 			lines: {
 				reelAndRow: number[][];
@@ -251,7 +235,7 @@
 				numberOfSymbol: number;
 			}[];
 			reward: number;
-		} = await response.json();
+		} = responseSpinObject.result;
 
 		if (result.reward > 10) {
 			//Wait 2 seconds for playing rising sound

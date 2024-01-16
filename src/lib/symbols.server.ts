@@ -276,6 +276,10 @@ function validatePayoutRatio() {
 }
 
 export function getRandMatrixSymbol(rows: number = 5) {
+    //Check if rows not > 30
+    if (rows > 30) {
+        rows = 30;
+    }
     const matrix = [];
     //5 columns
     for (let i = 0; i < 5; i++) {
