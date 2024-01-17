@@ -80,7 +80,7 @@
 	async function tryCreateNewTheme() {
 		const theme = {
 			themePrompt: inputText,
-			precision: 20,
+			precision: 25,
 			useOpenAPI,
 			openAPIKey,
 			useBetterPrompt

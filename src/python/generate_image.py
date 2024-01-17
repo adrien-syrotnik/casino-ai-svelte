@@ -55,7 +55,10 @@ def progress(step, timestep, latents):
 
 # https://huggingface.co/docs/diffusers/using-diffusers/conditional_image_generation
 
-image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps, num_images_per_prompt=1, height=height, width=width).images[0]
+# image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps, num_images_per_prompt=1, height=height, width=width).images[0]
+
+image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps).images[0]
+
 
 # nb_images = 4
 

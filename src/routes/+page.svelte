@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import SlotMachine from './slot-machine.svelte';
+	import Roulette from './roulette.svelte';
 
 	/** @type {import('./$types').PageData} */
 	export let data: any;
@@ -33,3 +34,4 @@
 
 <SlotMachine bind:data></SlotMachine>
 
+<Roulette></Roulette>
