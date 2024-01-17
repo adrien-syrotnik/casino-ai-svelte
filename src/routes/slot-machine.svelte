@@ -46,7 +46,7 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	export const SYMBOLS = data.symbols as SlotSymbol[];
+	export let SYMBOLS = data.symbols as SlotSymbol[];
 	const currentConfig = data.currentConfig as SlotConfig;
 	const allConfigs = data.allConfigs as string[];
 
@@ -369,7 +369,7 @@
 ></audio>
 
 <div class="container justify-center mx-auto flex flex-col text-center" style="width: 1000px;">
-	{#if localStorageLoaded}
+	{#if localStorageLoaded && SYMBOLS.length > 0}
 		<form method="post" use:enhance>
 			<label class="label">
 				<span>Select a theme</span>
@@ -391,19 +391,19 @@
 			style="width: {slot_width * $zoomWin}px; height: {slot_height * $zoomWin}px;"
 		>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[0]} />
+				<SlotReel bind:this={Slotreel[0]} bind:SYMBOLS={SYMBOLS} />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[1]} />
+				<SlotReel bind:this={Slotreel[1]} bind:SYMBOLS={SYMBOLS} />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[2]} />
+				<SlotReel bind:this={Slotreel[2]} bind:SYMBOLS={SYMBOLS} />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[3]} />
+				<SlotReel bind:this={Slotreel[3]} bind:SYMBOLS={SYMBOLS} />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[4]} />
+				<SlotReel bind:this={Slotreel[4]} bind:SYMBOLS={SYMBOLS} />
 			</div>
 		</div>
 

@@ -48,17 +48,20 @@
 	});
 </script>
 
-<!-- {$yPos + initY} -->
-
 {#if symbol}
 	<div
 		bind:this={symbolNode}
 		style="transform: translateY({$yPos - initY}px);"
 		class="symbol flex justify-center items-center text-3xl"
 	>
+		{#if symbol.image}
 		<div class="symbol-image" style='background-image: url("{symbol?.image}");'>
-			{symbol ? (symbol.image ? '' : symbol.name) : ''}
 		</div>
+		{:else}
+		<div class="symbol-image">
+			{symbol.name}
+		</div>
+		{/if}
 	</div>
 {/if}
 

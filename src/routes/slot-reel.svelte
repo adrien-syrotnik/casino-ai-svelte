@@ -5,6 +5,7 @@
 	import Symbol from './symbol.svelte';
 	import type { SlotSymbol } from '$lib/symbols.types';
 
+	export let SYMBOLS: SlotSymbol[] = [];
 
 	let SymbolsNodes: {
 		initY: number;
@@ -31,6 +32,11 @@
 				symbol: symbol
 			});
 		}
+
+		//Add images to symbols
+		SymbolsNodes.forEach((symbolNode, i) => {
+			symbolNode.symbol.image = SYMBOLS.find((s) => s.name == symbolNode.symbol.name)?.image;
+		});
 
 		//Refresh symbols
 		SymbolsNodes = [...SymbolsNodes];
@@ -71,7 +77,10 @@
 			// Set current symbols (1 - 3)
 			currentSymbols = SymbolsNodesTemp.slice(1, 4).map((s) => s.symbol.name);
 
-			// console.log(SymbolsNodes.map((s) => s.symbol.name));
+			//Add images to symbols
+			SymbolsNodesTemp.forEach((symbolNode, i) => {
+				symbolNode.symbol.image = SYMBOLS.find((s) => s.name == symbolNode.symbol.name)?.image;
+			});
 
 			SymbolsNodes = [];
 

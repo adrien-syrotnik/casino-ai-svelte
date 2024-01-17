@@ -1,9 +1,10 @@
-import { DEFAULT_SYMBOLS, currentConfig, getAllConfigs, getConfig, setConfig } from '$lib/symbols.server';
+import { DEFAULT_SYMBOLS, getAllConfigs, getConfig } from '$lib/symbols.server';
+import type { SlotConfig } from '$lib/symbols.types';
 import type { Actions } from './$types';
 
 export function load({ cookies }) {
 
-	let currentConfigToSend = currentConfig;
+	let currentConfigToSend: SlotConfig;
 
 	let themeChoose = cookies.get('themeChoose') as string;
 
@@ -14,13 +15,23 @@ export function load({ cookies }) {
 		catch(e){
 			cookies.delete('themeChoose', { path: '/' });
 			themeChoose = 'default';
+			currentConfigToSend = getConfig('default');
 		}
-		setConfig(themeChoose);
 	}
+	else {
+		currentConfigToSend = getConfig('default');
+	}
+
+	const SYMBOLS_WITH_IMAGES = DEFAULT_SYMBOLS.map((symbol) => {
+		return {
+			...symbol,
+			image: currentConfigToSend.images[symbol.name]
+		}
+	});
 		
 
 	return {
-		symbols: DEFAULT_SYMBOLS,
+		symbols: SYMBOLS_WITH_IMAGES,
 		currentConfig: currentConfigToSend,
         allConfigs: getAllConfigs()
 	};
