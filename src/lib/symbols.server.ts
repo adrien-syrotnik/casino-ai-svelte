@@ -57,7 +57,7 @@ const weights_symbols: { [key: string]: number } = {
     'm2': 80,
     'm3': 75,
     'm4': 65,
-    'wild': 80,
+    'wild': 8000,
 }
 
 

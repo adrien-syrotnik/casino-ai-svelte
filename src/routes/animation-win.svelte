@@ -14,6 +14,9 @@
 	let audioMONSTERWIN: HTMLAudioElement;
 	let audioIMPOSSIBLE: HTMLAudioElement;
 
+	let textShadow = "-5px 0 black, 0 5px black, 5px 0 black, 0 -5px black";
+	// let textShadow = '0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px';
+
 	let unsubscribeTriggerWin: Unsubscriber;
 
 	onMount(() => {
@@ -70,7 +73,7 @@
 				name: 'ULTRA WIN!',
 				start: 100,
 				image: 'images/super-win.png',
-				font_color: '(#800080',
+				font_color: '#800080',
 				size_start: 130,
 				size_end: 150,
 				song: audioULTRAWIN,
@@ -128,6 +131,28 @@
 					xDirRange : [-50, 50],
 					xRange : [-window.innerWidth/2, window.innerWidth/2],
 				}
+			},
+			{
+				name: 'GOD!!!',
+				start: 2000,
+				image: 'images/jackpot.png',
+				font_color: '#fff',
+				// font_color: '#000080',
+				size_start: 180,
+				size_end: 220,
+				song: audioIMPOSSIBLE,
+				volume: 1,
+				playbackRate: 2,
+				numberOfCoin: 130,
+				//White text shadow
+				// textShadow: "-5px 0 white, 0 5px white, 5px 0 white, 0 -5px white",
+				coinConfig: {
+					yDirRange : [-400, 400],
+					xDirRange : [-400, 400],
+					xRange : [-window.innerWidth/2, window.innerWidth/2],
+					gravityRange : [0, 0.01],
+					yRange : [-window.innerHeight, 0],
+				}
 			}
 		];
 	});
@@ -165,6 +190,7 @@
 		volume?: number;
 		playbackRate?: number;
 		numberOfCoin: number;
+		textShadow?: string;
 		coinConfig?: {
 			xRange?: [number, number],
 			yRange?: [number, number],
@@ -261,6 +287,8 @@
 			numberCoin = step.numberOfCoin;
 			configCoin = step.coinConfig;
 
+			if(step.textShadow) textShadow = step.textShadow;
+
 			sizeTextTransition.set(40, { duration: 0, easing: cubicInOut });
 			sizeTextTransition.set(50, { duration: 200, easing: cubicInOut });
 
@@ -330,6 +358,7 @@
 		class="flex flex-col justify-center items-center"
 		transition:scale={{ duration: 500, easing: quintOut }}
 		on:click={() => nextSpinFunction?.()}
+		style="text-shadow: {textShadow};"
 	>
 		<div
 			class="number-win"
@@ -410,7 +439,6 @@
 		font-family: 'SuperstarM54-Zq6K';
 		z-index: 101;
 		/* Add border to text 5px */
-		text-shadow: -5px 0 black, 0 5px black, 5px 0 black, 0 -5px black;
 
 		text-wrap: nowrap;
 	}
