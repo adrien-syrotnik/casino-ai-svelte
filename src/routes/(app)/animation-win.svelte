@@ -13,6 +13,8 @@
 	let audioJACKPOT: HTMLAudioElement;
 	let audioMONSTERWIN: HTMLAudioElement;
 	let audioIMPOSSIBLE: HTMLAudioElement;
+	let audioGOD: HTMLAudioElement;
+	let audioIMMORTAL: HTMLAudioElement;
 
 	let textShadow = "-5px 0 black, 0 5px black, 5px 0 black, 0 -5px black";
 	// let textShadow = '0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px';
@@ -38,6 +40,7 @@
 				font_color: '#FFD700',
 				size_start: 100,
 				size_end: 120,
+				textShadow: "-5px 0 black, 0 5px black, 5px 0 black, 0 -5px black",
 				song: audioBIGWIN,
 				numberOfCoin: 15
 			},
@@ -138,9 +141,9 @@
 				image: 'images/jackpot.png',
 				font_color: '#fff',
 				// font_color: '#000080',
-				size_start: 180,
-				size_end: 220,
-				song: audioIMPOSSIBLE,
+				size_start: 170,
+				size_end: 200,
+				song: audioGOD,
 				volume: 1,
 				playbackRate: 2,
 				numberOfCoin: 130,
@@ -149,6 +152,28 @@
 				coinConfig: {
 					yDirRange : [-400, 400],
 					xDirRange : [-400, 400],
+					xRange : [-window.innerWidth/2, window.innerWidth/2],
+					gravityRange : [0, 0.01],
+					yRange : [-window.innerHeight, 0],
+				}
+			},
+			{
+				name: 'IMMORTAL!!!',
+				start: 5000,
+				image: 'images/jackpot.png',
+				font_color: '#fff',
+				// font_color: '#000080',
+				size_start: 200,
+				size_end: 240,
+				song: audioIMMORTAL,
+				volume: 1,
+				playbackRate: 2,
+				numberOfCoin: 150,
+				//White text shadow
+				textShadow: "-5px 0 white, 0 5px white, 5px 0 white, 0 -5px white",
+				coinConfig: {
+					yDirRange : [-4, 4],
+					xDirRange : [-4, 4],
 					xRange : [-window.innerWidth/2, window.innerWidth/2],
 					gravityRange : [0, 0.01],
 					yRange : [-window.innerHeight, 0],
@@ -334,13 +359,27 @@
 	let numberCoin = 0;
 </script>
 
-<audio src="musics/1.wav" bind:this={audioBIGWIN}></audio>
+<!-- Classic music -->
+<!-- <audio src="musics/1.wav" bind:this={audioBIGWIN}></audio>
 <audio src="musics/2.wav" bind:this={audioMEGAWIN}></audio>
 <audio src="musics/3.wav" bind:this={audioHUGEWIN}></audio>
 <audio src="musics/4.wav" bind:this={audioULTRAWIN}></audio>
 <audio src="musics/end.mp3" bind:this={audioJACKPOT}></audio>
 <audio src="musics/end.mp3" bind:this={audioMONSTERWIN}></audio>
 <audio src="musics/end.mp3" bind:this={audioIMPOSSIBLE}></audio>
+<audio src="musics/end.mp3" bind:this={audioGOD}></audio>
+<audio src="musics/end.mp3" bind:this={audioIMMORTAL}></audio> -->
+
+<!-- Indestructible Music -->
+<audio src="musics/indestructible/1.wav" bind:this={audioBIGWIN}></audio>
+<audio src="musics/indestructible/2.wav" bind:this={audioMEGAWIN}></audio>
+<audio src="musics/indestructible/3.wav" bind:this={audioHUGEWIN}></audio>
+<audio src="musics/indestructible/4.wav" bind:this={audioULTRAWIN}></audio>
+<audio src="musics/indestructible/5.wav" bind:this={audioJACKPOT}></audio>
+<audio src="musics/indestructible/6.wav" bind:this={audioMONSTERWIN}></audio>
+<audio src="musics/indestructible/7.wav" bind:this={audioIMPOSSIBLE}></audio>
+<audio src="musics/indestructible/8.wav" bind:this={audioGOD}></audio>
+<audio src="musics/indestructible/9.wav" bind:this={audioIMMORTAL}></audio>
 
 {#if show}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->

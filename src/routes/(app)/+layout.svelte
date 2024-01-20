@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '../app.postcss';
+	import '../../app.postcss';
 
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
@@ -31,7 +31,6 @@
 		rewardsModal: { ref: RewardsModal }
 	};
 </script>
-
 
 <AnimationWin></AnimationWin>
 

@@ -1,6 +1,7 @@
 import { DEFAULT_SYMBOLS, getAllConfigs, getConfig } from '$lib/symbols.server';
 import type { SlotConfig } from '$lib/symbols.types';
-import type { Actions } from './$types';
+import type { Actions } from '@sveltejs/kit';
+
 
 export function load({ cookies }) {
 
