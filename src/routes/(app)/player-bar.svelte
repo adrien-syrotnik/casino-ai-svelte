@@ -81,7 +81,7 @@
 	<!-- balance -->
 	<div class="mx-2 text-2xl">
 		<span>
-			{balance}€
+			{balance.toFixed(2)}€
 		</span>
 		<br />
 		<small> BALANCE </small>

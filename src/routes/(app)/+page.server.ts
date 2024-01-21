@@ -36,11 +36,16 @@ export async function load({ cookies }) {
 	//Get player data
 	const player = await bdd.getPlayer(cookies.get('auth-token') as string) as PlayerData;
 
+
+	//Get the leaderboard best wins
+	const allBestWins = await bdd.getBestWins();
+
 	return {
 		symbols: SYMBOLS_WITH_IMAGES,
 		currentConfig: currentConfigToSend,
         allConfigs: getAllConfigs(),
 		player,
+		allBestWins
 	};
 }
 

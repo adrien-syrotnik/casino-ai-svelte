@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { DEFAULT_SYMBOLS, checkLines25, getRandMatrixSymbol } from '$lib/symbols.server';
 import { bdd } from '$lib/bdd.server';
+import type { BestWin } from '$lib/bdd-types.js';
 
 
 /** @type {import('./$types').RequestHandler} */
@@ -18,7 +19,10 @@ export async function POST({ request, cookies }) {
 		return json({ error: 'Bad token' }, { status: 400 });
 	}
 
-	const { rows, bet } = await request.json();
+	// eslint-disable-next-line prefer-const
+	let { rows, bet } = await request.json();
+	
+	bet = Number(bet);
 
 	//Check if user have enough money
 	if(user.balance < bet){
@@ -50,6 +54,19 @@ export async function POST({ request, cookies }) {
 	await bdd.updatePlayer(user);
 
 	const newBalance = user.balance;
+
+
+	//Add best win to leaderboard
+	if(result.reward > 0){
+		const win: BestWin = {
+			multiplier: result.reward / bet,
+			bet,
+			date: Date.now().toString(),
+			username: user.name,
+			reward: result.reward
+		}
+		await bdd.checkBestWin(win);
+	}
 
 	return json({ matrix : symbolMatrix, bonus, wildPosition, result, newBalance });
 }

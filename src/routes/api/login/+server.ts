@@ -33,6 +33,12 @@ export async function POST({ request, cookies }) {
 		return json({ id, redirectPath, user });
 	}
 
+	//Check if the username is already taken
+	const usernameTaken = await bdd.getPlayerByName(username);
+	if(usernameTaken){
+		return json({ error: 'Username already taken or bad password' }, { status: 400 });
+	}
+
 	//Create the user
 	const newUser = {
 		id,

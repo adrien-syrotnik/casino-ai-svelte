@@ -1,13 +1,15 @@
 import { env } from '$env/dynamic/private';
 import { promises as fs } from 'fs';
 import { sha256 } from 'js-sha256';
-import type { PlayerData } from './bdd-types';
+import type { BestWin as WinDetail, PlayerData } from './bdd-types';
 
 // Path: src/lib/bdd.server.ts
 const save_file_path = 'src/lib/bdd.json';
 
 export type BddData = {
-    players: PlayerData[]
+    players: PlayerData[],
+    bestWinsMultiplier: WinDetail[],
+    bestWins: WinDetail[]
 }
 
 export class Bdd {
@@ -15,7 +17,9 @@ export class Bdd {
 
     constructor() {
         this.data = {
-            players: []
+            players: [],
+            bestWinsMultiplier: [],
+            bestWins: []
         };
     }
 
@@ -28,11 +32,21 @@ export class Bdd {
             if (!this.data.players) {
                 this.data.players = [];
             }
+            //Check if bestWinsMultiplier exists
+            if (!this.data.bestWinsMultiplier) {
+                this.data.bestWinsMultiplier = [];
+            }
+            //Check if bestWins exists
+            if (!this.data.bestWins) {
+                this.data.bestWins = [];
+            }
         } catch (e) {
             console.error('Error while loading bdd, trying to recreate the file...');
             //If error, try to recreate the file
             this.data = {
-                players: []
+                players: [],
+                bestWinsMultiplier: [],
+                bestWins: []
             };
             await this.save();
             //then rety to load
@@ -55,6 +69,10 @@ export class Bdd {
 
     public async getPlayer(id: string): Promise<PlayerData | undefined> {
         return this.data.players.find(player => player.id === id);
+    }
+
+    public async getPlayerByName(name: string): Promise<PlayerData | undefined> {
+        return this.data.players.find(player => player.name === name);
     }
 
     public async updatePlayer(player: PlayerData) {
@@ -81,6 +99,52 @@ export class Bdd {
         console.log(id_sha256);
         return id_sha256;
 	}
+
+
+    //Part best wins, only 5 best wins are saved
+    private async addBestWinMultiplier(win: WinDetail) {
+        //Check if win multiplier is better than the last one
+        if (this.data.bestWinsMultiplier.length === 5 && this.data.bestWinsMultiplier[this.data.bestWinsMultiplier.length - 1].multiplier >= win.multiplier) {
+            return;
+        }
+        //Add the win
+        this.data.bestWinsMultiplier.push(win);
+        //Sort the array
+        this.data.bestWinsMultiplier.sort((a, b) => b.multiplier - a.multiplier);
+        //Remove the last one if there is more than 5
+        if (this.data.bestWinsMultiplier.length > 5) {
+            this.data.bestWinsMultiplier.pop();
+        }
+        await this.save();
+    }
+
+    private async addBestWin(win: WinDetail) {
+        //Check if win is better than the last one
+        if (this.data.bestWins.length === 5 && this.data.bestWins[this.data.bestWins.length - 1].reward >= win.reward) {
+            return;
+        }
+        //Add the win
+        this.data.bestWins.push(win);
+        //Sort the array
+        this.data.bestWins.sort((a, b) => b.reward - a.reward);
+        //Remove the last one if there is more than 5
+        if (this.data.bestWins.length > 5) {
+            this.data.bestWins.pop();
+        }
+        await this.save();
+    }
+
+    public async checkBestWin(win: WinDetail) {
+        await this.addBestWin(win);
+        await this.addBestWinMultiplier(win);
+    }
+
+    public async getBestWins() {
+        return {
+            bestWins: this.data.bestWins,
+            bestWinsMultiplier: this.data.bestWinsMultiplier
+        }
+    }
 }
 
 //Create the bdd instance
