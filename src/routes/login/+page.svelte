@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+
 
     let username = '';
     let password = '';
@@ -14,10 +16,21 @@
 
         if (res.ok) {
             const data = await res.json();
-            console.log(data);
+            //If redirectPath is set, redirect to that path
+            if (data.redirectPath) {
+                goto(data.redirectPath);
+            }
+        }
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key == 'Enter') {
+            login();
         }
     }
 </script>
+
+<svelte:window on:keydown={onKeyDown} />
 
 <div class="container mx-auto h-full flex justify-center items-center">
 	<div

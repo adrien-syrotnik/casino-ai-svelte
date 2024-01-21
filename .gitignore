@@ -12,4 +12,5 @@ vite.config.ts.timestamp-*
 src/python/image-generator-env
 src/python/images
 
+src/lib/bdd.json
 # static/slot-configs

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { bdd, type PlayerData } from '$lib/bdd.server';
+import { bdd } from '$lib/bdd.server';
+import type { PlayerData } from '$lib/bdd-types';
 
 
 /** @type {import('./$types').RequestHandler} */
@@ -10,6 +11,9 @@ export async function POST({ request, cookies }) {
 	if(!username || !password || username.length < 3 || password.length < 3){
 		return json({ error: 'Username or password is invalid' }, { status: 400 });
 	}
+
+	//Get path from cookie
+	const redirectPath = cookies.get('redirect-path');
 
 	//Create the id from username and password, by creating a hash and using a salt from .env
 	const id = bdd.createId(username, password);
@@ -26,7 +30,7 @@ export async function POST({ request, cookies }) {
 			},
 		);
 
-		return json({ id });
+		return json({ id, redirectPath, user });
 	}
 
 	//Create the user
@@ -47,5 +51,5 @@ export async function POST({ request, cookies }) {
 		},
 	);
 
-	return json({ id });
+	return json({ id, redirectPath, user: newUser });
 }

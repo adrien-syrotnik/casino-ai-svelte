@@ -1,16 +1,10 @@
 import { env } from '$env/dynamic/private';
 import { promises as fs } from 'fs';
 import { sha256 } from 'js-sha256';
+import type { PlayerData } from './bdd-types';
 
 // Path: src/lib/bdd.server.ts
 const save_file_path = 'src/lib/bdd.json';
-
-export type PlayerData = {
-    name: string,
-    id: string,
-    balance: number,
-    created_at: string
-}
 
 export type BddData = {
     players: PlayerData[]
@@ -29,8 +23,20 @@ export class Bdd {
         try {
             const data = await fs.readFile(save_file_path, 'utf8');
             this.data = JSON.parse(data);
+
+            //Check if players exists
+            if (!this.data.players) {
+                this.data.players = [];
+            }
         } catch (e) {
-            console.error(e);
+            console.error('Error while loading bdd, trying to recreate the file...');
+            //If error, try to recreate the file
+            this.data = {
+                players: []
+            };
+            await this.save();
+            //then rety to load
+            await this.load();
         }
     }
 

@@ -10,17 +10,18 @@
 	import { tweened } from 'svelte/motion';
 	import { cubicInOut, elasticInOut } from 'svelte/easing';
 	import AnimationBonus from './animation-bonus.svelte';
+	import type { PlayerData } from '$lib/bdd-types';
+	import { page } from '$app/stores';
+	import { player } from '$lib/player-store';
+	
 
 	onMount(async () => {
-		if (localStorage.getItem('balance')) balance = Number(localStorage.getItem('balance')!);
+		page.subscribe((page) => {
+			if (page.data && page.data.player) {
+				player.set(page.data.player as PlayerData);
+			}
+		});
 
-		//Check if balnce is NaN, if so, set it to 500
-		if (isNaN(balance)) {
-			balance = 500;
-			localStorage.setItem('balance', balance.toString());
-		}
-
-		localStorageLoaded = true;
 
 		const responseSpinMatrix = await fetch('/api/slot/random-symbol', {
 			method: 'POST',
@@ -104,7 +105,6 @@
 		currentWinLineNumberOfSymbols = 0;
 	}
 
-	let localStorageLoaded = false;
 
 	function SpinReels(reel: number, symbols: SlotSymbol[]) {
 		Slotreel[reel].spinAllSymbols(symbols);
@@ -112,7 +112,7 @@
 
 	let reward = 0;
 
-	let balance = 500;
+	$: balance = $player.balance;
 	let bet = 1;
 
 	let spinEnabled = true;
@@ -160,7 +160,7 @@
 
 		const responseSpin = await fetch('/api/slot/spin', {
 			method: 'POST',
-			body: JSON.stringify({ rows: 25 }),
+			body: JSON.stringify({ rows: 25, bet: bet }),
 			headers: {
 				'content-type': 'application/json'
 			}
@@ -261,12 +261,14 @@
 		}
 
 		reward = result.reward * bet;
-		balance += reward;
 
-		localStorage.setItem('balance', balance.toString());
+		//Fix balance using responseSpinObject.newBalance
+		balance = responseSpinObject.newBalance;
 
-		//Check that balance is decimal fixed to 2
-		balance = Math.round(balance * 100) / 100;
+		// balance += reward;
+
+		// //Check that balance is decimal fixed to 2
+		// balance = Math.round(balance * 100) / 100;
 
 		winLinesAnimationTab = result.lines;
 
@@ -369,7 +371,7 @@
 ></audio>
 
 <div class="container justify-center mx-auto flex flex-col text-center" style="width: 1000px;">
-	{#if localStorageLoaded && SYMBOLS.length > 0}
+	{#if SYMBOLS.length > 0}
 		<form method="post" use:enhance>
 			<label class="label">
 				<span>Select a theme</span>
