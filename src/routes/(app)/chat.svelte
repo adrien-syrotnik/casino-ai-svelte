@@ -1,31 +1,14 @@
 <script lang="ts">
 	// Components
 	import { Avatar } from '@skeletonlabs/skeleton';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { io, Socket } from 'socket.io-client';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { player } from '$lib/player-store';
-
-    const urlWebSocket = "http://localhost:3000";
-
-	const socket = io(urlWebSocket);
-
-	socket.on('message', (message) => {
-		//Add message to messageFeed
-		const newMessage = {
-			host: false,
-			name: message.name,
-			timestamp: message.timestamp,
-			message: message.message
-		};
-
-		messageFeed = [...messageFeed, newMessage];
-	});
 
 	// Types
 	interface MessageFeed {
 		host: boolean;
 		name: string;
-		timestamp: string;
+		timestamp: number;
 		message: string;
 	}
 
@@ -41,21 +24,19 @@
 		elemChat.scrollTo({ top: elemChat.scrollHeight, behavior });
 	}
 
-	function getCurrentTimestamp(): string {
-		return new Date().toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-	}
-
-	function addMessage(): void {
+	async function addMessage() {
 		if (!currentMessage) return;
 
 		const newMessage = {
 			host: true,
 			name: $player.name,
-			timestamp: `Today @ ${getCurrentTimestamp()}`,
+			timestamp: new Date().getTime(),
 			message: currentMessage
 		};
 
-		socket.emit('message', newMessage);
+		console.log(newMessage);
+
+		await sendNewMessage(newMessage);
 
 		// Update the message feed
 		messageFeed = [...messageFeed, newMessage];
@@ -81,9 +62,59 @@
 		dispatch('close');
 	};
 
+	async function sendNewMessage(message: MessageFeed) {
+		lastTimestamp = message.timestamp;
+
+		fetch('/api/chat/new-message', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ message })
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				
+			});
+	}
+
+	let intervalRefreshMessages: NodeJS.Timeout;
+
+	let lastTimestamp: number = new Date().getTime();
+
 	// When DOM mounted, scroll to bottom
 	onMount(() => {
-		// scrollChatBottom();
+		intervalRefreshMessages = setInterval(() => {
+			//Try to get messages from server, put date in body
+			fetch('/api/chat/refresh-chat', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ lastTimestamp })
+			})
+				.then((res) => res.json())
+				.then((data) => {
+					data = data.messages;
+					// console.log(data);
+					for (let i = 0; i < data.length; i++) {
+						if (data[i].timestamp <= lastTimestamp) continue;
+						const newMessage = {
+							host: false,
+							name: data[i].name,
+							timestamp: data[i].timestamp,
+							message: data[i].message
+						};
+						messageFeed = [...messageFeed, newMessage];
+						lastTimestamp = data[i].timestamp;
+					}
+					// scrollChatBottom();
+				});
+		}, 5000);
+	});
+
+	onDestroy(() => {
+		clearInterval(intervalRefreshMessages);
 	});
 </script>
 
@@ -92,9 +123,9 @@
 	<section class="card">
 		<div class="chat w-full h-full">
 			<!-- Close button -->
-            <div class="flex justify-end">
-                <button class="btn m-2 btn-icon variant-filled-primary" on:click={onClose}>X</button>
-            </div>
+			<div class="flex justify-end">
+				<button class="btn m-2 btn-icon variant-filled-primary" on:click={onClose}>X</button>
+			</div>
 
 			<!-- Chat -->
 			<div class="w-full">

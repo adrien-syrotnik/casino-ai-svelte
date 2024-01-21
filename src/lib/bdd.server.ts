@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import { promises as fs } from 'fs';
 import { sha256 } from 'js-sha256';
 import type { BestWin as WinDetail, PlayerData } from './bdd-types';
+import { addMessage } from './chat.server';
 
 // Path: src/lib/bdd.server.ts
 const save_file_path = 'src/lib/bdd.json';
@@ -104,9 +105,17 @@ export class Bdd {
     //Part best wins, only 5 best wins are saved
     private async addBestWinMultiplier(win: WinDetail) {
         //Check if win multiplier is better than the last one
-        if (this.data.bestWinsMultiplier.length === 5 && this.data.bestWinsMultiplier[this.data.bestWinsMultiplier.length - 1].multiplier >= win.multiplier) {
+        if (this.data.bestWinsMultiplier.length === 5 && this.data.bestWinsMultiplier[this.data.bestWinsMultiplier.length - 1].multiplier > win.multiplier) {
             return;
         }
+
+        //Add an announcement in the chat
+        addMessage({
+            name: 'Announcement',
+            timestamp: Date.now(),
+            message: `🎉 New best win multiplier: ${win.username} won ${win.reward}€ with a bet of ${win.bet}€ and a multiplier of ${win.multiplier} 🎉`
+        });
+
         //Add the win
         this.data.bestWinsMultiplier.push(win);
         //Sort the array
@@ -120,9 +129,17 @@ export class Bdd {
 
     private async addBestWin(win: WinDetail) {
         //Check if win is better than the last one
-        if (this.data.bestWins.length === 5 && this.data.bestWins[this.data.bestWins.length - 1].reward >= win.reward) {
+        if (this.data.bestWins.length === 5 && this.data.bestWins[this.data.bestWins.length - 1].reward > win.reward) {
             return;
         }
+
+        //Add an announcement in the chat
+        addMessage({
+            name: 'Announcement',
+            timestamp: Date.now(),
+            message: `🎉 New best win: ${win.username} won ${win.reward}€ with a bet of ${win.bet}€ and a multiplier of ${win.multiplier} 🎉`
+        });
+
         //Add the win
         this.data.bestWins.push(win);
         //Sort the array
