@@ -9,7 +9,10 @@
 		type ModalComponent,
 		AppBar,
 		type PopupSettings,
-		popup
+		popup,
+		Drawer,
+		getDrawerStore,
+		type DrawerSettings
 	} from '@skeletonlabs/skeleton';
 	import xml from 'highlight.js/lib/languages/xml'; // for HTML
 	import css from 'highlight.js/lib/languages/css';
@@ -31,6 +34,9 @@
 	import RewardsModal from './rewards-modal.svelte';
 	import AnimationWin from './animation-win.svelte';
 	import { player } from '$lib/player-store';
+	import { tweened } from 'svelte/motion';
+	import { cubicInOut } from 'svelte/easing';
+	import Chat from './chat.svelte';
 
 	initializeStores();
 
@@ -58,6 +64,29 @@
 		target: 'popupHover',
 		placement: 'right'
 	};
+
+
+	let chatX = tweened(700, { duration: 300, easing: cubicInOut });
+	let chatOpen = false;
+
+	function openChat() {
+		chatX.set(0);
+		chatOpen = true;
+	}
+
+	function closeChat() {
+		chatX.set(700);
+		chatOpen = false;
+	}
+
+	function toggleChat() {
+		if (!chatOpen) {
+			openChat();
+		} else {
+			closeChat();
+		}
+	}
+
 </script>
 
 <div class="card p-4 variant-filled-secondary" data-popup="popupHover">
@@ -72,13 +101,27 @@
 		<!-- Logout -->
 		<button class="btn variant-filled-primary" on:click={logout}>Logout</button>
 		<!-- Reset Balance -->
-		<button class="btn variant-filled-warning" on:click={resetBalance}>Reset Balance<small>(1000€)</small></button>
+		<button class="btn variant-filled-warning" on:click={resetBalance}
+			>Reset Balance<small>(1000€)</small></button
+		>
 	</div>
 </div>
 
 <AnimationWin></AnimationWin>
 
 <Modal components={modalRegistry} />
+
+<div id="chat" style="position: fixed; bottom: 0; right: 0; z-index: 100; transform: translateX({$chatX}px);">
+	<Chat on:close={closeChat} />
+</div>
+
+<button
+	class="btn variant-filled-success"
+	style="position: fixed; bottom: 10px; right: 10px; z-index: 1;"
+	on:click={toggleChat}
+>
+	Open chat
+</button>
 
 <slot />
 

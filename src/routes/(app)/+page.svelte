@@ -3,6 +3,8 @@
 	import SlotMachine from './slot-machine.svelte';
 	import Roulette from './roulette.svelte';
 	import Leaderboard from './leaderboard.svelte';
+	
+	import Chat from './chat.svelte';
 
 	/** @type {import('./$types').PageData} */
 	export let data: any;
@@ -31,7 +33,6 @@
 <!-- <AppBar gridColumns="grid-cols-1" background={''} slotDefault="place-self-center">
 	<img src="/logo2-bg.jpg" alt="logo" style="width: 150px; border-radius: 50%;" />
 </AppBar> -->
-
 
 <SlotMachine bind:data></SlotMachine>
 
