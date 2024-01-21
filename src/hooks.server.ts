@@ -5,6 +5,12 @@ export const handle = async ({ event, resolve }) => {
     const currentPath = event.url.pathname;
     const cookies = event.cookies;
 
+    //If /socket.io/ is called, do nothing
+    if (currentPath.includes("/socket.io/")) {
+        const response = await resolve(event);
+        return response;
+    }
+
     // Auth check
     const isTokenValid = await validateTokenFunction(cookies);
 

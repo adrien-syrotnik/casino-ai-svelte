@@ -5,7 +5,9 @@
 	import { io, Socket } from 'socket.io-client';
 	import { player } from '$lib/player-store';
 
-	const socket = io();
+    const urlWebSocket = "http://localhost:3000";
+
+	const socket = io(urlWebSocket);
 
 	socket.on('message', (message) => {
 		//Add message to messageFeed
