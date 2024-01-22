@@ -139,7 +139,7 @@
 									<div class="card p-4 variant-soft rounded-tl-none space-y-2">
 										<header class="flex justify-between items-center">
 											<p class="font-bold">{bubble.name}</p>
-											<small class="opacity-50">{bubble.timestamp}</small>
+											<small class="opacity-50">{new Date(bubble.timestamp).toLocaleTimeString()}</small>
 										</header>
 										<p>{bubble.message}</p>
 									</div>
@@ -149,7 +149,7 @@
 									<div class="card p-4 rounded-tr-none space-y-2 variant-soft-primary">
 										<header class="flex justify-between items-center">
 											<p class="font-bold">{bubble.name}</p>
-											<small class="opacity-50">{bubble.timestamp}</small>
+											<small class="opacity-50">{new Date(bubble.timestamp).toLocaleTimeString()}</small>
 										</header>
 										<p>{bubble.message}</p>
 									</div>

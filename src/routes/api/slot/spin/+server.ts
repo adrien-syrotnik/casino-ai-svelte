@@ -48,7 +48,7 @@ export async function POST({ request, cookies }) {
 	const result = checkLines25(reel1, reel2, reel3, reel4, reel5);
 
 	//Update user balance
-	user.balance += result.reward;
+	user.balance += result.reward * bet;
 
 	//Update user data
 	await bdd.updatePlayer(user);
