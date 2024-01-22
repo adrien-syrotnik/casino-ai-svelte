@@ -82,7 +82,6 @@ export class Bdd {
             throw new Error('Player not found');
         }
         this.data.players[index] = player;
-        await this.save();
     }
 
     public async deletePlayer(id: string) {
@@ -93,11 +92,8 @@ export class Bdd {
     public createId(username: string, password: string) {
 		//Create the id from username and password, by creating a hash and using a salt from .env
         const id = username + password + env.SALT;
-        console.log(env.SALT);
-        console.log(id);
         //Sha256
         const id_sha256 = sha256(id);
-        console.log(id_sha256);
         return id_sha256;
 	}
 
