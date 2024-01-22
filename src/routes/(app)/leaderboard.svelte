@@ -29,7 +29,7 @@
 					{#if bestScores && bestScores.bestWins[i]}
 						<div class="flex flex-col variant-ghost-success card p-2">
 							<div>{bestScores.bestWins[i].username} ({bestScores.bestWins[i].bet.toFixed(2)}€)</div>
-							<div style="color: gold; font-weight: 800;">{bestScores.bestWins[i].reward.toFixed(2)}€</div>
+							<div style="color: gold; font-weight: 800;">{(bestScores.bestWins[i].reward * bestScores.bestWins[i].bet).toFixed(2)}€</div>
 						</div>
 					{:else}
 						<div>-</div>
