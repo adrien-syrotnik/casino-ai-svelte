@@ -3,6 +3,13 @@ import torch
 import sys
 import os
 
+import torch
+from diffusers import (
+    StableDiffusionXLPipeline, 
+    KDPM2AncestralDiscreteScheduler,
+    AutoencoderKL
+)
+
 #get arguments from node.js
 args = sys.argv[1:]
 
@@ -27,7 +34,9 @@ width=512
 
 # print(prompt)
         
-pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')  
+# pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1', torch_dtype=torch.float16).to('cuda')
+
+
 # pipeline = AutoPipelineForText2Image.from_pretrained('openskyml/dalle-3-xl', torch_dtype=torch.float16).to('cuda')  
 # pipeline = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", use_safetensors=True)
     
@@ -41,6 +50,28 @@ pipeline = AutoPipelineForText2Image.from_pretrained('dataautogpt3/OpenDalleV1.1
 # pipeline = StableDiffusionPipeline.from_single_file(
 #     "https://huggingface.co/openskyml/dalle-3-xl/blob/main/Dall-e_3_0.3-v2.safetensors"
 # ).to('cuda')
+
+
+#NEW
+
+# Load VAE component
+vae = AutoencoderKL.from_pretrained(
+    "madebyollin/sdxl-vae-fp16-fix", 
+    torch_dtype=torch.float16
+)
+
+# Configure the pipeline
+pipeline = StableDiffusionXLPipeline.from_pretrained(
+    "dataautogpt3/ProteusV0.2", 
+    vae=vae,
+    torch_dtype=torch.float16
+)
+pipeline.scheduler = KDPM2AncestralDiscreteScheduler.from_config(pipeline.scheduler.config)
+pipeline.to('cuda')
+
+# prompt = "black fluffy gorgeous dangerous cat animal creature, large orange eyes, big fluffy ears, piercing gaze, full moon, dark ambiance, best quality, extremely detailed"
+negative_prompt = "bad quality, not symbol, worst quality, low quality, low resolutions, blur, blurry, ugly, wrongs proportions, watermark, image artifacts, lowres, ugly, jpeg artifacts, deformed, noisy image"
+
 
 
 #Disable safety checker
@@ -57,7 +88,17 @@ def progress(step, timestep, latents):
 
 # image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps, num_images_per_prompt=1, height=height, width=width).images[0]
 
-image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps).images[0]
+# image = pipeline(prompt, callback=progress, callback_steps=1, num_inference_steps=num_inference_steps).images[0]
+
+image = pipeline(
+    prompt, 
+    negative_prompt=negative_prompt, 
+    width=1024,
+    height=1024,
+    guidance_scale=7,
+    num_inference_steps=num_inference_steps,
+).images[0]
+
 
 
 # nb_images = 4

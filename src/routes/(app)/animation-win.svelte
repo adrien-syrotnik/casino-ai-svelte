@@ -5,6 +5,7 @@
 	import { tweened, type Unsubscriber } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
 	import CoinsAnimation from './coins-animation.svelte';
+	import { IndestructibleConfig, SunoConfig, currentMusicConfig } from '$lib/player-store';
 
 	let audioBIGWIN: HTMLAudioElement;
 	let audioMEGAWIN: HTMLAudioElement;
@@ -31,6 +32,29 @@
 				StartAnimation(win.win);
 			}
 		});
+
+		//Load all audios by setting the src and preload to auto
+		let config = $currentMusicConfig == 'Suno' ? SunoConfig : IndestructibleConfig;
+		audioBIGWIN.src = config['1'];
+		audioMEGAWIN.src = config['2'];
+		audioHUGEWIN.src = config['3'];
+		audioULTRAWIN.src = config['4'];
+		audioJACKPOT.src = config['5'];
+		audioMONSTERWIN.src = config['6'];
+		audioIMPOSSIBLE.src = config['7'];
+		audioGOD.src = config['8'];
+		audioIMMORTAL.src = config['9'];
+
+		//Load all audios
+		audioBIGWIN.load();
+		audioMEGAWIN.load();
+		audioHUGEWIN.load();
+		audioULTRAWIN.load();
+		audioJACKPOT.load();
+		audioMONSTERWIN.load();
+		audioIMPOSSIBLE.load();
+		audioGOD.load();
+		audioIMMORTAL.load();
 
 		stepAvailabe = [
 			{
@@ -359,27 +383,17 @@
 	let numberCoin = 0;
 </script>
 
-<!-- Classic music -->
-<!-- <audio src="musics/1.wav" bind:this={audioBIGWIN}></audio>
-<audio src="musics/2.wav" bind:this={audioMEGAWIN}></audio>
-<audio src="musics/3.wav" bind:this={audioHUGEWIN}></audio>
-<audio src="musics/4.wav" bind:this={audioULTRAWIN}></audio>
-<audio src="musics/end.mp3" bind:this={audioJACKPOT}></audio>
-<audio src="musics/end.mp3" bind:this={audioMONSTERWIN}></audio>
-<audio src="musics/end.mp3" bind:this={audioIMPOSSIBLE}></audio>
-<audio src="musics/end.mp3" bind:this={audioGOD}></audio>
-<audio src="musics/end.mp3" bind:this={audioIMMORTAL}></audio> -->
 
-<!-- Indestructible Music -->
-<audio src="musics/indestructible/1.wav" bind:this={audioBIGWIN}></audio>
-<audio src="musics/indestructible/2.wav" bind:this={audioMEGAWIN}></audio>
-<audio src="musics/indestructible/3.wav" bind:this={audioHUGEWIN}></audio>
-<audio src="musics/indestructible/4.wav" bind:this={audioULTRAWIN}></audio>
-<audio src="musics/indestructible/5.wav" bind:this={audioJACKPOT}></audio>
-<audio src="musics/indestructible/6.wav" bind:this={audioMONSTERWIN}></audio>
-<audio src="musics/indestructible/7.wav" bind:this={audioIMPOSSIBLE}></audio>
-<audio src="musics/indestructible/8.wav" bind:this={audioGOD}></audio>
-<audio src="musics/indestructible/9.wav" bind:this={audioIMMORTAL}></audio>
+<!-- Music -->
+<audio bind:this={audioBIGWIN}></audio>
+<audio bind:this={audioMEGAWIN}></audio>
+<audio bind:this={audioHUGEWIN}></audio>
+<audio bind:this={audioULTRAWIN}></audio>
+<audio bind:this={audioJACKPOT}></audio>
+<audio bind:this={audioMONSTERWIN}></audio>
+<audio bind:this={audioIMPOSSIBLE}></audio>
+<audio bind:this={audioGOD}></audio>
+<audio bind:this={audioIMMORTAL}></audio>
 
 {#if show}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->

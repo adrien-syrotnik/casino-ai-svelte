@@ -12,33 +12,14 @@
 	import AnimationBonus from './animation-bonus.svelte';
 	import type { PlayerData } from '$lib/bdd-types';
 	import { page } from '$app/stores';
-	import { player } from '$lib/player-store';
-	
+	import { currentMusicConfig, player } from '$lib/player-store';
 
 	onMount(async () => {
 		page.subscribe((page) => {
 			if (page.data && page.data.player) {
 				player.set(page.data.player as PlayerData);
+				onDataLoaded();
 			}
-		});
-
-
-		const responseSpinMatrix = await fetch('/api/slot/random-symbol', {
-			method: 'POST',
-			body: JSON.stringify({ rows: 5 }),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-
-		const json = await responseSpinMatrix.json();
-		const spinMatrix = json.matrix as SlotSymbol[][]; //5 rows, 5 columns
-
-		const symbolsReel = [spinMatrix[0], spinMatrix[1], spinMatrix[2], spinMatrix[3], spinMatrix[4]];
-
-		//Init all reels
-		Slotreel.forEach((reel: SlotReel, i) => {
-			reel.InitSymbols(symbolsReel[i]);
 		});
 	});
 
@@ -50,6 +31,8 @@
 	export let SYMBOLS = data.symbols as SlotSymbol[];
 	const currentConfig = data.currentConfig as SlotConfig;
 	const allConfigs = data.allConfigs as string[];
+
+	const allMusicConfigs = ['Suno', 'Indestructible'];
 
 	const modal: ModalSettings = {
 		type: 'component',
@@ -105,7 +88,6 @@
 		currentWinLineNumberOfSymbols = 0;
 	}
 
-
 	function SpinReels(reel: number, symbols: SlotSymbol[]) {
 		Slotreel[reel].spinAllSymbols(symbols);
 	}
@@ -135,8 +117,6 @@
 		if (autoSpinLeft > 0) {
 			StartAutoSpin(autoSpinLeft);
 		}
-
-		
 	}
 
 	function StopAutoSpin() {
@@ -353,6 +333,56 @@
 		});
 		unsubscribe();
 	}
+
+	let isAllImageLoaded = false;
+	let nbImagesLoaded = 0;
+
+	async function LoadAllImages() {
+		console.log('LoadAllImages');
+		await Promise.all(
+			SYMBOLS.map(async (symbol) => {
+				const img = new Image();
+				if (symbol.image) {
+					img.src = symbol.image;
+					await new Promise((resolve) => {
+						img.onload = () => {
+							nbImagesLoaded++;
+							resolve('');
+						};
+					});
+				}
+			})
+		);
+		isAllImageLoaded = true;
+	}
+
+	async function onDataLoaded() {
+		const responseSpinMatrix = fetch('/api/slot/random-symbol', {
+			method: 'POST',
+			body: JSON.stringify({ rows: 5 }),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		await LoadAllImages();
+
+		const json = await (await responseSpinMatrix).json();
+		const spinMatrix = json.matrix as SlotSymbol[][]; //5 rows, 5 columns
+
+		const initSymbolsReel = [
+			spinMatrix[0],
+			spinMatrix[1],
+			spinMatrix[2],
+			spinMatrix[3],
+			spinMatrix[4]
+		];
+
+		//Init all reels
+		Slotreel.forEach((reel: SlotReel, i) => {
+			reel.InitSymbols(initSymbolsReel[i]);
+		});
+	}
 </script>
 
 <AnimationBonus bind:this={animationBonusNode}></AnimationBonus>
@@ -371,9 +401,9 @@
 ></audio>
 
 <div class="container justify-center mx-auto flex flex-col text-center" style="width: 1000px;">
-	{#if SYMBOLS.length > 0}
-		<form method="post" use:enhance>
-			<label class="label">
+	{#if SYMBOLS.length > 0 && isAllImageLoaded}
+		<form method="post" use:enhance class="flex justify-around">
+			<div class="w-50">
 				<span>Select a theme</span>
 				<select
 					class="select"
@@ -385,7 +415,20 @@
 						<option value={config}>{config}</option>
 					{/each}
 				</select>
-			</label>
+			</div>
+			<div>
+				<span>Select a music</span>
+				<select
+					class="select"
+					bind:value={$currentMusicConfig}
+					onchange="this.form.submit()"
+					name="musicChoose"
+				>
+					{#each allMusicConfigs as config}
+						<option value={config}>{config}</option>
+					{/each}
+				</select>
+			</div>
 		</form>
 
 		<div
@@ -393,19 +436,19 @@
 			style="width: {slot_width * $zoomWin}px; height: {slot_height * $zoomWin}px;"
 		>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[0]} bind:SYMBOLS={SYMBOLS} />
+				<SlotReel bind:this={Slotreel[0]} bind:SYMBOLS />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[1]} bind:SYMBOLS={SYMBOLS} />
+				<SlotReel bind:this={Slotreel[1]} bind:SYMBOLS />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[2]} bind:SYMBOLS={SYMBOLS} />
+				<SlotReel bind:this={Slotreel[2]} bind:SYMBOLS />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[3]} bind:SYMBOLS={SYMBOLS} />
+				<SlotReel bind:this={Slotreel[3]} bind:SYMBOLS />
 			</div>
 			<div class="reel">
-				<SlotReel bind:this={Slotreel[4]} bind:SYMBOLS={SYMBOLS} />
+				<SlotReel bind:this={Slotreel[4]} bind:SYMBOLS />
 			</div>
 		</div>
 
@@ -437,9 +480,18 @@
 		<ImageGeneratorBar />
 	{:else}
 		<div class="p-4 space-y-4">
-			<div class="placeholder mt-3" style="height: 40px; border-radius: 10px;" />
-			<div class="placeholder mx-auto" style="height: 300px; border-radius: 10px; width: 50%;" />
-			<div class="placeholder" style="height: 40px; border-radius: 10px;" />
+			<div class="placeholder animate-pulse mt-3" style="height: 40px; border-radius: 10px;" />
+			<div
+				class="placeholder animate-pulse mx-auto"
+				style="width: {slot_width * $zoomWin}px; height: {slot_height *
+					$zoomWin}px; border-radius: 15px;"
+			/>
+			<div class="placeholder animate-pulse" style="height: 40px; border-radius: 10px;" />
+
+			<!-- Show poucentage of image loaded: absolute position in the middle of the div: -->
+			<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+				{Math.round((nbImagesLoaded / SYMBOLS.length) * 100)}%
+			</div>
 		</div>
 	{/if}
 </div>
