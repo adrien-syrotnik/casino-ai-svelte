@@ -11,7 +11,7 @@ services:
     pull_policy: build
     volumes:
       - ./static/slot-configs:/slot-configs
-      - ./src/lib/bdd.json:/bdd.json
+      # - ./src/lib/bdd.json:/bdd.json
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.syrotnik-slot.entrypoints=websecure,web"
